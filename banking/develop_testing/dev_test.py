@@ -6,13 +6,6 @@ import interest_rates.models as i_models
 
 
 
-
-
-
-
-
-
-
 if __name__ == '__main__':
     proyeccion = 36
     producto = 'Vehiculos'

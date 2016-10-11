@@ -288,7 +288,6 @@ class CreditVintage:
         cashflows = self.cashflows()
         return cashflows['saldo_provision']
 
-
 def contractual_vintage(contractual_conditions, prepayment_rates, credit_model, out_to = None):
     loss_rates = credit_model.get('loss')
     nonperforming_rates = credit_model.get('nonperforming')
@@ -353,7 +352,6 @@ def contractual_vintage(contractual_conditions, prepayment_rates, credit_model, 
     else:
         print_vintage(ans_df)
 
-
 def vintage_settings(name, term, month, origination, rates, prepayment, credit_model):
     """Settings for creating a vintage object
     :return: dict
@@ -366,7 +364,6 @@ def vintage_settings(name, term, month, origination, rates, prepayment, credit_m
                 rates_vector = rates,
                 prepayment_vector = prepayment,
                 credit_model = credit_model)
-
 
 def collection_of_vintages(name, length_of_projection, term, rates, prepayment, credit_model, budget,
                            out_to = "consolidate"):
@@ -395,7 +392,6 @@ def collection_of_vintages(name, length_of_projection, term, rates, prepayment, 
     elif out_to == "consolidate print":
         print_consolidation(ans)
 
-
 def consolidation(collection):
 
     length = len(collection)
@@ -414,7 +410,6 @@ def consolidation(collection):
 
     return ans_df
 
-
 def print_consolidation(collection):
     from tabulate import tabulate
     print(tabulate(consolidation(collection),
@@ -422,7 +417,6 @@ def print_consolidation(collection):
                    numalign = 'right',
                    tablefmt = 'psql',
                    floatfmt = ",.0f"))
-
 
 def print_vintage(vintage):
     """
