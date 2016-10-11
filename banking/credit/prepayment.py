@@ -10,9 +10,9 @@ Description:
 '''
 
 
-class zePrepaymentModel:
+class PrepaymentModel:
     '''
-    Here we model different prepayment behaviors
+    Here we model different pre-payment behaviors
     '''
 
     def __init__(self):
@@ -55,14 +55,7 @@ class zePrepaymentModel:
                 ans[each_per] = ans[each_per - 1]
         return ans
 
-    @staticmethod
-    def lognormal(nper):
-        '''
-        resambling a lognormal distribution
-        :param nper:
-        :type nper:
-        '''
-        pass
+
         
         
 

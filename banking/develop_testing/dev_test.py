@@ -1,29 +1,39 @@
-'''
-
-Created on 7/10/2016
 
 
-'''
-import matplotlib
-matplotlib.use('Qt5Agg')
-
-import matplotlib.pyplot as plt
-from credit import *
+import credit
+import interest_rates
 
 
 
-nper = 60
-
-linear = PrepaymentModel.linear(nper, level=0.05)
-psa = PrepaymentModel.psa(nper, ceil=0.05, stable_per=24)
 
 
-plt.plot(linear)
-plt.plot(psa)
 
-plt.show()
 
 
 
 if __name__ == '__main__':
-    pass
+    proyeccion = 36
+    producto = 'Vehiculos'
+    plazo = 36
+    tasas = interest_rates.models.InterestRateModel.fixed(plazo, 0.0145)
+    prepago = credit.prepayment.PrepaymentModel.zero(plazo)
+    modelo_credito = credit.constructor.CreditModel.simple(plazo)
+    presupuesto = [70000] * proyeccion
+    
+    
+    cont_conditions = dict(balance = 0.0,
+                           ppmt = [0.0 / plazo] * plazo,
+                           fixed_rate = [0.012] * plazo,
+                           spread_DTF = None,
+                           spread_IBR = None,
+                           repricing = None)
+
+
+
+    cosecha_contractual = credit.constructor.contractual_vintage(cont_conditions, prepago, modelo_credito)
+    
+    cosechas = credit.constructor.collection_of_vintages(producto, proyeccion, plazo, tasas, prepago,
+                                      modelo_credito, presupuesto, 'consolidate')
+
+    cosechas_total = cosechas.add(cosecha_contractual, fill_value = 0)
+    credit.constructor.print_vintage(cosechas_total)
