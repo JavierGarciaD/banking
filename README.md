@@ -1,2 +1,2 @@
 # banking
-Some scrips for banking activities
+Some scripts for banking activities

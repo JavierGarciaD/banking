@@ -1,7 +1,9 @@
 
 
-import credit
-import interest_rates
+import credit.prepayment as prepay_model
+import credit.constructor as constructor
+import interest_rates.models as i_models
+
 
 
 
@@ -15,9 +17,10 @@ if __name__ == '__main__':
     proyeccion = 36
     producto = 'Vehiculos'
     plazo = 36
-    tasas = interest_rates.models.InterestRateModel.fixed(plazo, 0.0145)
-    prepago = credit.prepayment.PrepaymentModel.zero(plazo)
-    modelo_credito = credit.constructor.CreditModel.simple(plazo)
+    tasas = i_models.InterestRateModel.fixed(plazo, 0.0145)
+    prepago = prepay_model.PrepaymentModel.zero(plazo)
+    
+    modelo_credito = constructor.CreditModel.simple(plazo)
     presupuesto = [70000] * proyeccion
     
     
@@ -30,10 +33,10 @@ if __name__ == '__main__':
 
 
 
-    cosecha_contractual = credit.constructor.contractual_vintage(cont_conditions, prepago, modelo_credito)
+    cosecha_contractual = constructor.contractual_vintage(cont_conditions, prepago, modelo_credito)
     
-    cosechas = credit.constructor.collection_of_vintages(producto, proyeccion, plazo, tasas, prepago,
+    cosechas = constructor.collection_of_vintages(producto, proyeccion, plazo, tasas, prepago,
                                       modelo_credito, presupuesto, 'consolidate')
 
     cosechas_total = cosechas.add(cosecha_contractual, fill_value = 0)
-    credit.constructor.print_vintage(cosechas_total)
+    constructor.print_vintage(cosechas_total)
