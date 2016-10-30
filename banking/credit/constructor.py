@@ -4,11 +4,8 @@ Created on 11/10/2016
 @author: javgar119
 '''
 
-import pandas as pd
 import numpy as np
-
-
-
+import pandas as pd
 
 
 class CreditModel:
@@ -21,15 +18,18 @@ class CreditModel:
 
     @staticmethod
     def zero(nper):
-        return dict(loss = [0.0] * nper,
-                    nonperforming = [0.0] * nper,
-                    provision = [0.0] * nper)
+        return dict(loss=[0.0] * nper,
+                    nonperforming=[0.0] * nper,
+                    provision=[0.0] * nper)
 
     @staticmethod
-    def simple(nper, loss = 0.02, nonperforming = 0.03, provision = 0.035):
-        return dict(loss = [loss] * nper,
-                    nonperforming = [nonperforming] * nper,
-                    provision = [provision] * nper)
+    def simple(nper, loss=0.02,
+               nonperforming=0.03,
+               provision=0.035):
+        return dict(loss=[loss] * nper,
+                    nonperforming=[nonperforming] * nper,
+                    provision=[provision] * nper)
+
 
 class CreditVintage:
     """
@@ -102,15 +102,15 @@ class CreditVintage:
         prepayment_rates = self._prepayment_vector
         rates = self._rates_vector
 
-        ans_df = pd.DataFrame(0., index = range(self._nper), columns = ('saldo_inicial',
-                                                                        'desembolsos',
-                                                                        'amortizacion',
-                                                                        'prepago',
-                                                                        'castigo',
-                                                                        'saldo_final',
-                                                                        'interes',
-                                                                        'improductiva',
-                                                                        'saldo_provision'))
+        ans_df = pd.DataFrame(0., index=range(self._nper), columns=('saldo_inicial',
+                                                                    'desembolsos',
+                                                                    'amortizacion',
+                                                                    'prepago',
+                                                                    'castigo',
+                                                                    'saldo_final',
+                                                                    'interes',
+                                                                    'improductiva',
+                                                                    'saldo_provision'))
         ans_df.loc[0] = [0,
                          self._origination,
                          0,
@@ -127,18 +127,24 @@ class CreditVintage:
         for payment in range(self._nper):
             index = payment + 1
             loss = np.round(initial_balance * loss_rates[payment], rounding)
-            prepayment = np.round(initial_balance * prepayment_rates[payment], rounding)
-            nonperforming = np.round(initial_balance * nonperforming_rates[payment], rounding)
-            provision = np.round((provision_rates[payment] * (initial_balance - nonperforming)) + nonperforming)
-            ipmt = np.round((initial_balance - nonperforming) * rates[payment], rounding)
+            prepayment = np.round(
+                initial_balance * prepayment_rates[payment], rounding)
+            nonperforming = np.round(
+                initial_balance * nonperforming_rates[payment], rounding)
+            provision = np.round(
+                (provision_rates[payment] * (initial_balance - nonperforming)) + nonperforming)
+            ipmt = np.round(
+                (initial_balance - nonperforming) * rates[payment], rounding)
 
-            contractual_ppmt = np.round(-(np.ppmt(rates[payment], index, self._nper, self._origination)), rounding)
+            contractual_ppmt = np.round(
+                -(np.ppmt(rates[payment], index, self._nper, self._origination)), rounding)
             if contractual_ppmt > (initial_balance - prepayment - loss):
                 ppmt = np.round(initial_balance - prepayment - loss, rounding)
             else:
                 ppmt = contractual_ppmt
 
-            ending_balance = np.round(initial_balance - ppmt - prepayment - loss, rounding)
+            ending_balance = np.round(
+                initial_balance - ppmt - prepayment - loss, rounding)
             if ending_balance < min_balance:
                 ending_balance = 0.
 
@@ -170,19 +176,20 @@ class CreditVintage:
         provision_rates = self._credit_model.get('provision')
         prepayment_rates = self._prepayment_vector
         rates = self._rates_vector
-        index_to_apply = list(range(self.origination_month(), self.origination_month() + self._nper + 1))
+        index_to_apply = list(
+            range(self.origination_month(), self.origination_month() + self._nper + 1))
 
         ans_df = pd.DataFrame(0.,
-                              index = index_to_apply,
-                              columns = ('saldo_inicial',
-                                         'desembolsos',
-                                         'amortizacion',
-                                         'prepago',
-                                         'castigo',
-                                         'saldo_final',
-                                         'interes',
-                                         'improductiva',
-                                         'saldo_provision'))
+                              index=index_to_apply,
+                              columns=('saldo_inicial',
+                                       'desembolsos',
+                                       'amortizacion',
+                                       'prepago',
+                                       'castigo',
+                                       'saldo_final',
+                                       'interes',
+                                       'improductiva',
+                                       'saldo_provision'))
 
         ans_df.loc[self.origination_month()] = [0,
                                                 self._origination,
@@ -200,11 +207,14 @@ class CreditVintage:
         for payment in range(self._nper):
             index = payment + self.origination_month()
             loss = np.round(initial_balance * loss_rates[payment], rounding)
-            prepayment = np.round(initial_balance * prepayment_rates[payment], rounding)
-            nonperforming = np.round(initial_balance * nonperforming_rates[payment], rounding)
+            prepayment = np.round(
+                initial_balance * prepayment_rates[payment], rounding)
+            nonperforming = np.round(
+                initial_balance * nonperforming_rates[payment], rounding)
             provision = np.round((provision_rates[payment] * (initial_balance - nonperforming)) + nonperforming,
                                  rounding)
-            ipmt = np.round((initial_balance - nonperforming) * rates[payment], rounding)
+            ipmt = np.round(
+                (initial_balance - nonperforming) * rates[payment], rounding)
 
             contractual_ppmt = np.round(-(np.ppmt(rates[payment],
                                                   payment + 1, self._nper, self._origination)), rounding)
@@ -213,7 +223,8 @@ class CreditVintage:
             else:
                 ppmt = contractual_ppmt
 
-            ending_balance = np.round(initial_balance - ppmt - prepayment - loss, rounding)
+            ending_balance = np.round(
+                initial_balance - ppmt - prepayment - loss, rounding)
             if ending_balance < min_balance:
                 ending_balance = 0.
 
@@ -288,7 +299,8 @@ class CreditVintage:
         cashflows = self.cashflows()
         return cashflows['saldo_provision']
 
-def contractual_vintage(contractual_conditions, prepayment_rates, credit_model, out_to = None):
+
+def contractual_vintage(contractual_conditions, prepayment_rates, credit_model, out_to=None):
     loss_rates = credit_model.get('loss')
     nonperforming_rates = credit_model.get('nonperforming')
     provision_rates = credit_model.get('provision')
@@ -300,16 +312,16 @@ def contractual_vintage(contractual_conditions, prepayment_rates, credit_model, 
 
     index_to_apply = list(range(len(ppmt)))
     ans_df = pd.DataFrame(0.,
-                          index = index_to_apply,
-                          columns = ('saldo_inicial',
-                                     'desembolsos',
-                                     'amortizacion',
-                                     'prepago',
-                                     'castigo',
-                                     'saldo_final',
-                                     'interes',
-                                     'improductiva',
-                                     'saldo_provision'))
+                          index=index_to_apply,
+                          columns=('saldo_inicial',
+                                   'desembolsos',
+                                   'amortizacion',
+                                   'prepago',
+                                   'castigo',
+                                   'saldo_final',
+                                   'interes',
+                                   'improductiva',
+                                   'saldo_provision'))
 
     rounding = 6
     min_balance = 0.1
@@ -317,21 +329,28 @@ def contractual_vintage(contractual_conditions, prepayment_rates, credit_model, 
     origination = 0
     for key in range(len(ans_df)):
         if key == 0:
-            ans_df['saldo_inicial'] = np.round(contractual_conditions.get('balance'), rounding)
+            ans_df['saldo_inicial'] = np.round(
+                contractual_conditions.get('balance'), rounding)
 
         loss = np.round(initial_balance * loss_rates[key], rounding)
-        prepayment = np.round(initial_balance * prepayment_rates[key], rounding)
-        nonperforming = np.round(initial_balance * nonperforming_rates[key], rounding)
-        provision = np.round((provision_rates[key] * (initial_balance - nonperforming)) + nonperforming, rounding)
-        ipmt = np.round((initial_balance - nonperforming) * fixed_rate[key], rounding)
+        prepayment = np.round(
+            initial_balance * prepayment_rates[key], rounding)
+        nonperforming = np.round(
+            initial_balance * nonperforming_rates[key], rounding)
+        provision = np.round(
+            (provision_rates[key] * (initial_balance - nonperforming)) + nonperforming, rounding)
+        ipmt = np.round(
+            (initial_balance - nonperforming) * fixed_rate[key], rounding)
 
-        contractual_ppmt = np.round(contractual_conditions.get('ppmt')[key], rounding)
+        contractual_ppmt = np.round(
+            contractual_conditions.get('ppmt')[key], rounding)
         if contractual_ppmt > (initial_balance - prepayment - loss):
             ppmt = np.round(initial_balance - prepayment - loss, rounding)
         else:
             ppmt = contractual_ppmt
 
-        ending_balance = np.round(initial_balance - ppmt - prepayment - loss, rounding)
+        ending_balance = np.round(
+            initial_balance - ppmt - prepayment - loss, rounding)
         if ending_balance < min_balance:
             ending_balance = 0.
 
@@ -352,21 +371,23 @@ def contractual_vintage(contractual_conditions, prepayment_rates, credit_model, 
     else:
         print_vintage(ans_df)
 
+
 def vintage_settings(name, term, month, origination, rates, prepayment, credit_model):
     """Settings for creating a vintage object
     :return: dict
     """
 
-    return dict(name = name,
-                month = month,
-                origination = origination,
-                nper = term,
-                rates_vector = rates,
-                prepayment_vector = prepayment,
-                credit_model = credit_model)
+    return dict(name=name,
+                month=month,
+                origination=origination,
+                nper=term,
+                rates_vector=rates,
+                prepayment_vector=prepayment,
+                credit_model=credit_model)
+
 
 def collection_of_vintages(name, length_of_projection, term, rates, prepayment, credit_model, budget,
-                           out_to = "consolidate"):
+                           out_to="consolidate"):
     """
 
     :return: dict of dicts
@@ -392,31 +413,34 @@ def collection_of_vintages(name, length_of_projection, term, rates, prepayment, 
     elif out_to == "consolidate print":
         print_consolidation(ans)
 
+
 def consolidation(collection):
 
     length = len(collection)
     term = collection[0].nper()
-    ans_df = pd.DataFrame(0., index = range(term + length), columns = ('saldo_inicial',
-                                                                       'desembolsos',
-                                                                       'amortizacion',
-                                                                       'prepago',
-                                                                       'castigo',
-                                                                       'saldo_final',
-                                                                       'interes',
-                                                                       'improductiva',
-                                                                       'saldo_provision'))
+    ans_df = pd.DataFrame(0., index=range(term + length), columns=('saldo_inicial',
+                                                                   'desembolsos',
+                                                                   'amortizacion',
+                                                                   'prepago',
+                                                                   'castigo',
+                                                                   'saldo_final',
+                                                                   'interes',
+                                                                   'improductiva',
+                                                                   'saldo_provision'))
     for each_vintage in collection:
-        ans_df = ans_df.add(collection[each_vintage].cashflows(), fill_value = 0)
+        ans_df = ans_df.add(collection[each_vintage].cashflows(), fill_value=0)
 
     return ans_df
+
 
 def print_consolidation(collection):
     from tabulate import tabulate
     print(tabulate(consolidation(collection),
-                   headers = 'keys',
-                   numalign = 'right',
-                   tablefmt = 'psql',
-                   floatfmt = ",.0f"))
+                   headers='keys',
+                   numalign='right',
+                   tablefmt='psql',
+                   floatfmt=",.0f"))
+
 
 def print_vintage(vintage):
     """
@@ -426,7 +450,7 @@ def print_vintage(vintage):
     """
     from tabulate import tabulate
     print(tabulate(vintage,
-                   headers = 'keys',
-                   numalign = 'right',
-                   tablefmt = 'psql',
-                   floatfmt = ",.0f"))
+                   headers='keys',
+                   numalign='right',
+                   tablefmt='psql',
+                   floatfmt=",.0f"))

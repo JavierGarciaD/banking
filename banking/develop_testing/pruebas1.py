@@ -1,19 +1,31 @@
+# -*- coding: utf-8 -*-
+'''
+:author: MacroTrader
+:email:  javier.macro.trader@gmail.com
+Created on 30/10/2016
+
+Description:
+
+'''
+
 
 import credit.constructor as constructor
-import credit.prepayment as prepay_model
+import credit.prepayment as prepayment
 import interest_rates.models as i_models
 
 
 if __name__ == '__main__':
-    proyeccion = 11
-    producto = 'Vehiculos'
-    plazo = 36
+    proyeccion = 60
+    producto = 'pyme'
+    plazo = 24
     tasas = i_models.InterestRateModel.fixed(plazo, 0.0145)
-    prepago = prepay_model.PrepaymentModel.zero(plazo)
+    prepago = prepayment.psa(nper=plazo,
+                             ceil=0.03,
+                             stable_per=12)
 
     modelo_credito = constructor.CreditModel.simple(nper=plazo,
-                                                    loss=0.0)
-    presupuesto = [70000] * proyeccion
+                                                    loss=0.02)
+    presupuesto = [20000] * proyeccion
 
     cont_conditions = dict(balance=0.0,
                            ppmt=[0.0 / plazo] * plazo,
