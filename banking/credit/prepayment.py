@@ -12,14 +12,14 @@ Description: different prepayment models
 
 def zero(nper):
     """
-    zero prepayment model, there is not prepayment
+    :summary: zero prepayment model, there is not prepayment
     """
     return [0.] * nper
 
 
 def linear(nper, level=0.03):
     """
-    Simple linear prepayment, clients always prepay the same % value
+    :summary: Simple linear prepayment, clients always prepay the same % value
     :param nper: int number of periods
     :param level: float, 
     :return: constant list of monthly prepayment rates
@@ -29,8 +29,9 @@ def linear(nper, level=0.03):
 
 def psa(nper, ceil=0.03, stable_per=24):
     """
-    Variation of the Public Securities Association (PSA) prepayment model for Mortgage Backed Securities.
-    https://en.wikipedia.org/wiki/PSA_prepayment_model
+    :summary: Variation of the Public Securities Association (PSA) prepayment model 
+                for Mortgage Backed Securities.
+                https://en.wikipedia.org/wiki/PSA_prepayment_model
     :param nper: int
     :param ceil: float
     :param stable_per: int

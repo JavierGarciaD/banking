@@ -8,23 +8,20 @@ Description:
 
 '''
 
-
-import credit.constructor as constructor
-import credit.prepayment as prepayment
-import interest_rates.models as i_models
+import credit.constructor
+import credit.prepayment
+import interest_rates.models
 
 
 if __name__ == '__main__':
     proyeccion = 60
     producto = 'pyme'
     plazo = 24
-    tasas = i_models.InterestRateModel.fixed(plazo, 0.0145)
-    prepago = prepayment.psa(nper=plazo,
-                             ceil=0.03,
-                             stable_per=12)
+    tasas = interest_rates.models.fixed(plazo, 0.0145)
+    prepago = credit.prepayment.psa(nper=plazo, ceil=0.03, sstable_per=12)
 
-    modelo_credito = constructor.CreditModel.simple(nper=plazo,
-                                                    loss=0.02)
+    modelo_credito = credit.constructor.CreditModel.simple(nper=plazo,
+                                                           loss=0.02)
     presupuesto = [20000] * proyeccion
 
     cont_conditions = dict(balance=0.0,
@@ -34,11 +31,17 @@ if __name__ == '__main__':
                            spread_IBR=None,
                            repricing=None)
 
-    cosecha_contractual = constructor.contractual_vintage(
+    cosecha_contractual = credit.constructor.contractual_vintage(
         cont_conditions, prepago, modelo_credito)
 
-    cosechas = constructor.collection_of_vintages(producto, proyeccion, plazo, tasas, prepago,
-                                                  modelo_credito, presupuesto, 'consolidate')
+    cosechas = credit.constructor.collection_of_vintages(producto,
+                                                         proyeccion,
+                                                         plazo,
+                                                         tasas,
+                                                         prepago,
+                                                         modelo_credito,
+                                                         presupuesto,
+                                                         'consolidate')
 
     cosechas_total = cosechas.add(cosecha_contractual, fill_value=0)
-    constructor.print_vintage(cosechas_total)
+    credit.constructor.print_vintage(cosechas_total)
