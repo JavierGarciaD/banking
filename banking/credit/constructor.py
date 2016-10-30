@@ -34,7 +34,8 @@ class CreditVintage:
     """
 
     def __init__(self, settings):
-        """Init
+        """
+        Init
         """
         self._product_name = settings['name']
         self._origination = settings['origination']
@@ -52,7 +53,7 @@ class CreditVintage:
 
     def origination_month(self):
         """
-        :return: int moth of origination
+        :return: int month of origination
         """
         return self._origination_month
 

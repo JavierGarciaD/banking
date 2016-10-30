@@ -2,10 +2,7 @@
 '''
 :author: MacroTrader
 :email:  javier.macro.trader@gmail.com
-Created on 30/10/2016
-
-
-Description: different prepayment models
+:summary: different prepayment models to choose from
 
 '''
 
