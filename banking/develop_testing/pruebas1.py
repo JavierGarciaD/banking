@@ -1,12 +1,5 @@
-# -*- coding: utf-8 -*-
-'''
-:author: MacroTrader
-:email:  javier.macro.trader@gmail.com
-Created on 30/10/2016
+# encoding: utf-8
 
-Description:
-
-'''
 
 import credit.constructor
 import credit.prepayment
@@ -18,7 +11,7 @@ if __name__ == '__main__':
     producto = 'pyme'
     plazo = 24
     tasas = interest_rates.models.fixed(plazo, 0.0145)
-    prepago = credit.prepayment.psa(nper=plazo, ceil=0.03, sstable_per=12)
+    prepago = credit.prepayment.psa(nper=plazo, ceil=0.03, stable_per=12)
 
     modelo_credito = credit.constructor.CreditModel.simple(nper=plazo,
                                                            loss=0.02)
