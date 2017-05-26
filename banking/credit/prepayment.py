@@ -2,37 +2,37 @@
 '''
 :author: MacroTrader
 :email:  javier.macro.trader@gmail.com
-:summary: different prepayment models to choose from
+:summary: different pre-payment models to choose from
 
 '''
 
 
 def zero(nper):
     """
-    :summary: zero prepayment model, there is not prepayment
+    @summary: zero prepayment model, there is not prepayment
     """
     return [0.] * nper
 
 
 def linear(nper, level=0.03):
     """
-    :summary: Simple linear prepayment, clients always prepay the same % value
-    :param nper: int number of periods
-    :param level: float, 
-    :return: constant list of monthly prepayment rates
+    @summary: Simple linear prepayment, clients always prepay the same % value
+    @param nper: int number of periods
+    @param level: float, 
+    @return: constant list of monthly prepayment rates
     """
     return [level] * nper
 
 
 def psa(nper, ceil=0.03, stable_per=24):
     """
-    :summary: Variation of the Public Securities Association (PSA) prepayment model 
+    @summary: Variation of the Public Securities Association (PSA) prepayment model 
                 for Mortgage Backed Securities.
                 https://en.wikipedia.org/wiki/PSA_prepayment_model
-    :param nper: int
-    :param ceil: float
-    :param stable_per: int
-    :return: prepayment rate list
+    @param nper: int
+    @param ceil: float
+    @param stable_per: int
+    @return: prepayment rate list
     """
 
     ans = [0.] * nper
