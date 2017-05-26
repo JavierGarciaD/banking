@@ -46,13 +46,32 @@ class Cosecha_Credito:
         
         ans_df = pd.DataFrame(0.,
                               index=index_to_apply,
-                              columns=('saldo_inicial30',
-                                       'desembolso',
-                                       'recaudo',
-                                       'prepago',
-                                       'castigo',
-                                       'saldo_final',
-                                       'interes',
-                                       'improductiva'))
+                              columns=('saldo_inicial30', 'saldo_inicial60', 'saldo_inicial90',
+                                       'saldo_inicial120', 'saldo_inicial150',
+                                       'saldo_inicial180', 'saldo_inicial210',
+                                       'desembolso30',
+                                       'recaudo30', 'recaudo60',
+                                       'recaudo90', 'recaudo120',
+                                       'recaudo150', 'recaudo180',
+                                       'recaudo210',
+                                       'prepago30', 'prepago60',
+                                       'prepago90', 'prepago120',
+                                       'prepago150', 'prepago180',
+                                       'prepago210',
+                                       'castigo30', 'castigo60',
+                                       'castigo90', 'castigo120',
+                                       'castigo150', 'castigo180',
+                                       'castigo210',
+                                       'saldo_final30', 'saldo_final60',
+                                       'saldo_final90', 'saldo_final120',
+                                       'saldo_final50', 'saldo_final180',
+                                       'saldo_final210',
+                                       'interes30', 'interes60',
+                                       'interes90', 'interes120',
+                                       'interes150', 'interes180',
+                                       'interes210'))
+                                       
         
         return ans_df
+
+
