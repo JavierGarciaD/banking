@@ -4,8 +4,8 @@ import credit.constructor
 import credit.constructor_cosechas as constructor
 import credit.prepayment
 import interest_rates.models
+import pandas as pd
 
-import pprint
 
 
 
@@ -20,7 +20,7 @@ def correr_constructor_antiguo():
                                                            loss = 0.02)
     presupuesto = [20000] * proyeccion
 
-    cont_conditions = dict(balance = 0.0,
+    cont_conditions = dict(constructor_de_balance = 0.0,
                            ppmt = [0.0 / plazo] * plazo,
                            fixed_rate = [0.012] * plazo,
                            spread_DTF = None,
@@ -46,16 +46,24 @@ def correr_constructor_antiguo():
 def settings_cosecha():
 
     producto = 'credioficial'
-    tipo_tasa = 'fija'
+    tipo_tasa = 'FIJA'
     frecuencia_reprecio = 0
     plazo = 36
-    fecha_originacion = "2017-1-31"
+    fecha_originacion = pd.to_datetime("2017-1-31")
     desembolso = 10000.0
+    max_forecast = 120
+    
+    alturas_mora = [0, 30, 60, 90, 120, 150, 180, 210]
+    
+    vector_tasas_indice = pd.Series([0.0 * max_forecast], 
+                                    index= alturas_mora)
+    
+    spread_originacion = interest_rates.models.fixed(max_forecast, 
+                                                     fecha_originacion, 0.22)
 
-    vector_tasas_indice = [.0] * plazo
-    tasa_originacion = interest_rates.models.fixed(plazo, 0.0134)
-    vector_prepago = credit.prepayment.psa(
-        nper = plazo, ceil = 0.03, stable_per = 12)
+    vector_prepago = credit.prepayment.psa(nper = max_forecast,
+                                           ceil = 0.03,
+                                           stable_per = 12)
 
     matrices_transicion = {1:[[0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],  # 0
                               [0.0, 0.4, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0],  # 30
@@ -67,46 +75,38 @@ def settings_cosecha():
                               [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]  # 210
                            }
 
-    recaudo_por_calificacion = {0:1.0,
-                                30:1.0,
-                                60:0.90,
-                                90:0.80,
-                                120:0.70,
-                                150:0.0,
-                                180:0.0,
-                                210:0.0}
 
-    castigo_por_calificacion = {0:0.0,
-                                30:0.0,
-                                60:0.0,
-                                90:0.0,
-                                120:0.0,
-                                150:0.0,
-                                180:0.0,
-                                210:1.0}
+    percent_prepago_por_calificacion = pd.Series([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                                  index = alturas_mora)
 
-    provision_por_calificacion = {0:0.03,
-                                  30:0.035,
-                                  60:0.05,
-                                  90:0.1,
-                                  120:0.15,
-                                  150:0.25,
-                                  180:0.50,
-                                  210:1.0}
+
+    percent_recaudo_por_calificacion = pd.Series([1.0, 0.9, 0.7, 0.00, 0.0, 0.0, 0.0, 0.0],
+                                                  index = alturas_mora)
+
+
+    percent_castigo_por_calificacion = pd.Series([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+                                                  index = alturas_mora)
+
+
+    percent_provision_por_calificacion = pd.Series([0.03, 0.035, 0.05, 0.10, 0.15, 0.25, 0.50, 1.0],
+                                                  index = alturas_mora)
 
     settings = dict(producto = producto,
                     plazo = plazo,
                     tipo_tasa = tipo_tasa,
+                    max_forecast = max_forecast,
+                    alturas_mora = alturas_mora,
                     frecuencia_reprecio = frecuencia_reprecio,
                     fecha_originacion = fecha_originacion,
                     desembolso = desembolso,
                     vector_tasas_indice = vector_tasas_indice,
-                    tasa_originacion = tasa_originacion,
+                    spread_originacion = spread_originacion,
                     vector_prepago = vector_prepago,
+                    percent_prepago_por_calificacion = percent_prepago_por_calificacion,
                     matrices_transicion = matrices_transicion,
-                    recaudo_por_calificacion = recaudo_por_calificacion,
-                    castigo_por_calificacion = castigo_por_calificacion,
-                    provision_por_calificacion = provision_por_calificacion,
+                    percent_recaudo_por_calificacion = percent_recaudo_por_calificacion,
+                    percent_castigo_por_calificacion = percent_castigo_por_calificacion,
+                    percent_provision_por_calificacion = percent_provision_por_calificacion,
                     )
 
     return settings
