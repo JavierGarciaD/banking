@@ -6,12 +6,14 @@ import pandas as pd
 from decimal import Decimal, getcontext, ROUND_HALF_DOWN
 from develop_testing.pruebas1 import *
 from pprint import pprint
+from os.path import expanduser
+
 
 class Cosecha_Credito:
-    #===========================================================================
-    # Construct an object with information for a loan portfolio on
-    # an homogeneous loan pool, where the loans share the same origination period.
-    #===========================================================================
+    """
+    Construct an object with information for a loan portfolio on
+    an homogeneous loan pool, where the loans share the same origination period.
+    """
 
     def __init__(self, settings):
         """
@@ -25,6 +27,7 @@ class Cosecha_Credito:
         self._fecha_originacion = settings['fecha_originacion']
         self._desembolso = settings['desembolso']
 
+
         self._vector_tasas_indice = settings['vector_tasas_indice']
         self._spread_originacion = settings['spread_originacion']
 
@@ -34,7 +37,6 @@ class Cosecha_Credito:
         self._matrices_transcicion = settings['matrices_transicion']
         self._percent_amortizacion_por_calificacion = settings['percent_recaudo_por_calificacion']
         self._percent_castigo_por_calificacion = settings['percent_castigo_por_calificacion']
-        self._percent_provision_por_calificacion = settings['percent_provision_por_calificacion']
 
         self._max_forecast = settings['max_forecast']
 
@@ -42,6 +44,7 @@ class Cosecha_Credito:
         self.ans_df = self._df_structure()
         self.estructura_temporal = self._estructura_temporal_cartera()
         self.tasas_nmv = self._tasas_full_nmv()
+        self._min_balance = 0.0001
 
 
     def producto(self):
@@ -65,15 +68,16 @@ class Cosecha_Credito:
         return self._fecha_originacion
 
 
-    def constructor_de_balance(self):
+    def _constructor_de_balance(self):
         """
         Construct a dataframe with projections of balances and cash flows for
         a loan portfolio in an homogeneous loan pool, where the loans share
         the same origination period.
+
+        No amplia el tamaño del df
+
         :return: dataframe
         """
-
-        
 
         # iterar cada fila
         for row, _col in self.ans_df.iterrows():
@@ -81,6 +85,42 @@ class Cosecha_Credito:
             # hacer desembolso en t+0
             if row == self.fecha_originacion():
                 self.ans_df.loc[self._fecha_originacion, 'desembolso0'] = self._desembolso
+
+            self._prepago_por_calificacion(row)
+            self._castigo_por_calificacion(row)
+            self._amortizacion_por_calificacion(row)
+            self._actualizar_saldo_final(row)
+            self._aplicar_transicion(row)
+
+
+        return self.ans_df
+
+
+    def _constructor_de_balance2(self):
+        """
+        Construct a dataframe with projections of balances and cash flows for
+        a loan portfolio in an homogeneous loan pool, where the loans share
+        the same origination period.
+
+
+
+        :return: dataframe
+        """
+        # TODO: por implemwentar
+
+        row = self.ans_df.index[0]
+        new_row = self.ans_df.index[0]
+
+
+
+        while row <= new_row:
+
+            print (row, new_row)
+
+
+            # hacer desembolso en t+0
+            if row == self.fecha_originacion():
+                    self.ans_df.loc[self._fecha_originacion, 'desembolso0'] = self._desembolso
 
 
             self._prepago_por_calificacion(row)
@@ -93,10 +133,9 @@ class Cosecha_Credito:
 
             self._aplicar_transicion(row)
 
-            # ampliar el dataframe si aun hay saldos
-            #if self.ans_df.shape[0] > rango:
-            #    rango = self.ans_df.shape[0]
-            #    i = i - 1
+
+            new_row = self.ans_df.index[-1]
+            if new_row > row: row = new_row
 
         return self.ans_df
 
@@ -107,7 +146,7 @@ class Cosecha_Credito:
         :return pandas dataframe
         """
 
-        dates_index = pd.date_range(self.fecha_originacion(), periods = self._max_forecast , freq = 'M')
+        dates_index = pd.date_range(self.fecha_originacion(), periods = self._max_forecast  , freq = 'M')
 
         return pd.DataFrame(0.0,
                             index = dates_index,
@@ -269,19 +308,20 @@ class Cosecha_Credito:
         nper = self._plazo
         per = row.to_period('M') - self._fecha_originacion.to_period('M')
 
+        # df de salida
         ans = pd.Series(0.0, index = self._alturas_mora)
 
-        # calcular el pago de principal para cada calificacion
-        if per > 0:
-            for index, val in k.iteritems():
+
+        for index, val in k.iteritems():
+            # calcular el pago de principal para cada calificacion
+            if per > 0 and per <= nper:
                 ppay = np.abs(np.ppmt(i, per, nper, val, 0))
+                ppay = ppay * self._percent_amortizacion_por_calificacion[index]
+
                 ans.set_value(index, ppay)
-
-        # ajustar por la probabilidad de pago dada altura de mora
-        ans = ans * self._percent_amortizacion_por_calificacion
-
-
-
+            # despues del plazo original cualquiera que se pone al dia va a recaudo
+            elif per > nper and index == 0:
+                ans.set_value(index, self.ans_df.loc[row, "saldo_inicial0"])
 
 
         # actualizar el dataframe de salida
@@ -336,15 +376,21 @@ class Cosecha_Credito:
     def _aplicar_transicion(self, row):
         """
         Apply a transition matrix to a vector of balances for delinquency,
-        update end constructor_de_balance of month 0 as beginning constructor_de_balance month 1
+        update end _constructor_de_balance of month 0 as beginning _constructor_de_balance month 1
         """
 
-        vector_saldo_final = self.get_saldo_final(row)
+        sf = self.get_saldo_final(row)
+        sf_trans = pd.Series(np.dot(np.transpose(self._matriz_de_transicion(row)),
+                                                       sf),
+                                                index = self._alturas_mora)
 
-        vector_final_con_transicion = np.dot(np.transpose(self._matriz_de_transicion(row)),
-                                            vector_saldo_final)
+        # filtrar saldos minimos
+        sf_trans_filter = sf_trans.apply(lambda x : x if x > self._min_balance else 0.0)
 
-        self._actualizar_saldo_inicial(row + 1, vector_final_con_transicion)
+        #print(row, self.ans_df.index[-1])
+        # no añadir filas al dataframe
+        if row + 1 <= self.ans_df.index[-1]:
+            self._actualizar_saldo_inicial(row + 1, sf_trans_filter)
 
 
     def _actualizar_saldo_inicial(self, row, vector_final_con_transicion):
@@ -352,14 +398,16 @@ class Cosecha_Credito:
         Actualiza el saldo inicial de un periodo como el saldo final del
         periodo anterior aplicada la matriz de transicion por calificacion
         """
-        self.ans_df.loc[row, "saldo_inicial0"] = vector_final_con_transicion[0]
-        self.ans_df.loc[row, "saldo_inicial30"] = vector_final_con_transicion[1]
-        self.ans_df.loc[row, "saldo_inicial60"] = vector_final_con_transicion[2]
-        self.ans_df.loc[row, "saldo_inicial90"] = vector_final_con_transicion[3]
-        self.ans_df.loc[row, "saldo_inicial120"] = vector_final_con_transicion[4]
-        self.ans_df.loc[row, "saldo_inicial150"] = vector_final_con_transicion[5]
-        self.ans_df.loc[row, "saldo_inicial180"] = vector_final_con_transicion[6]
-        self.ans_df.loc[row, "saldo_inicial210"] = vector_final_con_transicion[7]
+
+
+        self.ans_df.loc[row, "saldo_inicial0"] = vector_final_con_transicion.get_value(0)
+        self.ans_df.loc[row, "saldo_inicial30"] = vector_final_con_transicion.get_value(30)
+        self.ans_df.loc[row, "saldo_inicial60"] = vector_final_con_transicion.get_value(60)
+        self.ans_df.loc[row, "saldo_inicial90"] = vector_final_con_transicion.get_value(90)
+        self.ans_df.loc[row, "saldo_inicial120"] = vector_final_con_transicion.get_value(120)
+        self.ans_df.loc[row, "saldo_inicial150"] = vector_final_con_transicion.get_value(150)
+        self.ans_df.loc[row, "saldo_inicial180"] = vector_final_con_transicion.get_value(180)
+        self.ans_df.loc[row, "saldo_inicial210"] = vector_final_con_transicion.get_value(210)
 
 
     def get_saldo_final(self, row):
@@ -406,9 +454,15 @@ def print_cosecha(cosecha):
                    headers = 'keys',
                    numalign = 'right',
                    tablefmt = 'psql',
-                   floatfmt = ",.3f"))
+                   floatfmt = ",.5f"))
 
 
+def save_to_xls(bol, name):
+    if bol == True:
+        writer = pd.ExcelWriter(expanduser('~') + '/git/banking/data/' + name + '.xlsx')
+        balance.transpose().to_excel(writer)
+        writer.save()
+        print("DONE!")
 
 
 
@@ -416,9 +470,7 @@ if __name__ == '__main__':
 
 
     x1 = Cosecha_Credito(settings_cosecha())
-    balance = x1.constructor_de_balance()
+    balance = x1._constructor_de_balance()
     print_cosecha(balance)
 
-    # writer = pd.ExcelWriter('\\git\banking\data\cosecha.xlsx')
-    # balance.to_excel(writer)
-    # writer.save()
+    save_to_xls(True, 'cosecha')
