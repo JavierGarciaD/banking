@@ -7,40 +7,6 @@ import pandas as pd
 
 
 
-def correr_constructor_antiguo():
-    proyeccion = 24
-    producto = 'pyme'
-    plazo = 24
-    tasas = interest_rates.models.fixed(plazo, 0.0145)
-    prepago = credit.prepayment.psa(nper = plazo, ceil = 0.03, stable_per = 12)
-
-    modelo_credito = credit.constructor.CreditModel.simple(nper = plazo,
-                                                           loss = 0.02)
-    presupuesto = [20000] * proyeccion
-
-    cont_conditions = dict(_constructor_de_balance = 0.0,
-                           ppmt = [0.0 / plazo] * plazo,
-                           fixed_rate = [0.012] * plazo,
-                           spread_DTF = None,
-                           spread_IBR = None,
-                           repricing = None)
-
-    cosecha_contractual = credit.constructor.contractual_vintage(
-        cont_conditions, prepago, modelo_credito)
-
-    cosechas = credit.constructor.collection_of_vintages(producto,
-                                                         proyeccion,
-                                                         plazo,
-                                                         tasas,
-                                                         prepago,
-                                                         modelo_credito,
-                                                         presupuesto,
-                                                         'consolidate')
-
-    cosechas_total = cosechas.add(cosecha_contractual, fill_value = 0)
-    credit.constructor.print_vintage(cosechas_total)
-
-
 def settings_cosecha():
 
     producto = 'credioficial'
@@ -49,7 +15,7 @@ def settings_cosecha():
     plazo = 12
     fecha_originacion = pd.to_datetime("2017-1-31")
     desembolso = 10000.0
-    max_forecast = 24
+    max_forecast = plazo*2
 
     alturas_mora = [0, 30, 60, 90, 120, 150, 180, 210]
 
@@ -65,12 +31,12 @@ def settings_cosecha():
                                            stable_per = 12)
 
     matrices_transicion = {1:[[0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],  # 0
-                              [0.0, 0.4, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0],  # 30
-                              [0.0, 0.0, 0.4, 0.6, 0.0, 0.0, 0.0, 0.0],  # 60
-                              [0.0, 0.0, 0.0, 0.4, 0.6, 0.0, 0.0, 0.0],  # 90
-                              [0.0, 0.0, 0.0, 0.0, 0.2, 0.8, 0.0, 0.0],  # 120
+                              [0.5, 0.1, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0],  # 30
+                              [0.3, 0.0, 0.1, 0.6, 0.0, 0.0, 0.0, 0.0],  # 60
+                              [0.2, 0.0, 0.0, 0.2, 0.6, 0.0, 0.0, 0.0],  # 90
+                              [0.1, 0.0, 0.0, 0.0, 0.1, 0.8, 0.0, 0.0],  # 120
                               [0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.9, 0.0],  # 150
-                              [0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.7],  # 180
+                              [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.7],  # 180
                               [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]  # 210
                            }
 
@@ -105,3 +71,17 @@ def settings_cosecha():
                     percent_castigo_por_calificacion = percent_castigo_por_calificacion)
                     
     return settings
+
+
+def provision_por_calificacion():
+    
+    return {0 : 0.03,
+            30 : 0.05,
+            60 : 0.15,
+            90 : 0.40,
+            120 : 0.60,
+            150 : 0.80,
+            180 : 0.90,
+            210 : 1.00}
+    
+    
