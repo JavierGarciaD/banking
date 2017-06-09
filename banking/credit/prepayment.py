@@ -5,6 +5,7 @@
 :summary: different pre-payment models to choose from
 
 '''
+import numpy as np
 
 
 def zero(nper):
@@ -14,19 +15,19 @@ def zero(nper):
     return [0.] * nper
 
 
-def linear(nper, level=0.03):
+def linear(nper, level = 0.03):
     """
     @summary: Simple linear prepayment, clients always prepay the same % value
     @param nper: int number of periods
-    @param level: float, 
+    @param level: float,
     @return: constant list of monthly prepayment rates
     """
-    return [level] * nper
+    return np.round([level] * nper, 6)
 
 
-def psa(nper, ceil=0.03, stable_per=24):
+def psa(nper, ceil = 0.03, stable_per = 24):
     """
-    @summary: Variation of the Public Securities Association (PSA) prepayment model 
+    @summary: Variation of the Public Securities Association (PSA) prepayment model
                 for Mortgage Backed Securities.
                 https://en.wikipedia.org/wiki/PSA_prepayment_model
     @param nper: int
@@ -42,4 +43,4 @@ def psa(nper, ceil=0.03, stable_per=24):
             ans[each_per] = step * each_per
         else:
             ans[each_per] = ans[each_per - 1]
-    return ans
+    return np.round(ans, 6)
