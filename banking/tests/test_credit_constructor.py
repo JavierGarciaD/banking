@@ -7,9 +7,10 @@ Created on 8/06/2017
 from credit.constructor import *
 import pytest
 
-
-
-def test_my_function():
-    assert Prueba(2, 1).my_function() == 3
-  
-
+class TestEstructuraTemporal(object):
+    
+    def test_one(self):
+        pass
+    
+    def test_two(self):
+        pass
