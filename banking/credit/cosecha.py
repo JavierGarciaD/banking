@@ -25,8 +25,8 @@ class Cosecha_Credito:
         self._frecuencia_reprecio = settings['frecuencia_reprecio']
 
         self._tipo_tasa = settings['tipo_tasa']
-        self._vector_tasas_indice = np.round(settings['vector_tasas_indice'],6)
-        self._spread_originacion = np.round(settings['spread_originacion'],6)
+        self._vector_tasas_indice = np.round(settings['vector_tasas_indice'], 6)
+        self._spread_originacion = np.round(settings['spread_originacion'], 6)
 
         self._vector_prepago = settings['vector_prepago']
         self._percent_prepago_por_calificacion = settings['percent_prepago_por_calificacion']
@@ -74,49 +74,6 @@ class Cosecha_Credito:
         return self.ans_df
 
 
-    def _constructor_de_balance2(self):
-        """
-        Construct a dataframe with projections of balances and cash flows for
-        a loan portfolio in an homogeneous loan pool, where the loans share
-        the same origination period.
-
-
-
-        :return: dataframe
-        """
-        # TODO: por implemwentar
-
-        row = self.ans_df.index[0]
-        new_row = self.ans_df.index[0]
-
-
-
-        while row <= new_row:
-
-            print (row, new_row)
-
-
-            # hacer desembolso en t+0
-            if row == self.fecha_originacion():
-                    self.ans_df.loc[self._fecha_originacion, 'desembolso0'] = self._desembolso
-
-
-            self._prepago_por_calificacion(row)
-
-            self._castigo_por_calificacion(row)
-
-            self._amortizacion_por_calificacion(row)
-
-            self._actualizar_saldo_final(row)
-
-            self._aplicar_transicion(row)
-
-
-            new_row = self.ans_df.index[-1]
-            if new_row > row: row = new_row
-
-        return self.ans_df
-
 
     def _df_structure(self):
         """
@@ -125,14 +82,14 @@ class Cosecha_Credito:
         """
 
         dates_index = pd.date_range(self.fecha_originacion(),
-                                    periods = self._max_forecast,
-                                    freq = 'M')
+                                    periods=self._max_forecast,
+                                    freq='M')
 
         return pd.DataFrame(0.0,
-                            index = dates_index,
-                            columns = ('saldo_inicial0', 'saldo_inicial30', 
-                            'saldo_inicial60','saldo_inicial90', 'saldo_inicial120', 
-                            'saldo_inicial150','saldo_inicial180', 'saldo_inicial210',
+                            index=dates_index,
+                            columns=('saldo_inicial0', 'saldo_inicial30',
+                            'saldo_inicial60', 'saldo_inicial90', 'saldo_inicial120',
+                            'saldo_inicial150', 'saldo_inicial180', 'saldo_inicial210',
                             'desembolso0',
                             'amortizacion0', 'amortizacion30', 'amortizacion60', 'amortizacion90',
                             'amortizacion120', 'amortizacion150', 'amortizacion180', 'amortizacion210',
@@ -243,8 +200,8 @@ class Cosecha_Credito:
         aplicando la matriz de transicion para cada periodo
 
         """
-        # crea un diccionario vacio con n keys desde la fecha desde la originacion
-        dates_index = pd.date_range(self.fecha_originacion(), periods = self._max_forecast, freq = 'M')
+        # crea un diccionario vacio con n keys desde la fecha de originacion
+        dates_index = pd.date_range(self.fecha_originacion(), periods=self._max_forecast, freq='M')
         ans_dict = dict.fromkeys(dates_index)
 
         for key in dates_index:
@@ -252,23 +209,21 @@ class Cosecha_Credito:
             if key == dates_index[0]:
                 # mes cero, desembolso
                 ans_dict[dates_index[0]] = pd.Series([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                                                     index = self._alturas_mora)
+                                                     index=self._alturas_mora)
                 # aplicar transicion y actualizar t+1
-                from pprint import pprint
-                pprint(ans_dict[key])
                 ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                                index = self._alturas_mora)
-                ans_dict[key + 1 ] = ans
+                                index=self._alturas_mora)
+                ans_dict[key + 1] = ans
 
             else:
 
                 ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                                index = self._alturas_mora)
-                ans_dict[key + 1 ] = ans
+                                index=self._alturas_mora)
+                ans_dict[key + 1] = ans
 
         # TODO: refactor para no repetir instrucciones
         
-        pprint(ans_dict)
+        
         return ans_dict
 
 
@@ -301,15 +256,15 @@ class Cosecha_Credito:
         per = row.to_period('M') - self._fecha_originacion.to_period('M')
 
         # df de salida
-        ans = pd.Series(0.0, index = self._alturas_mora)
+        ans = pd.Series(0.0, index=self._alturas_mora)
 
 
         for index, val in k.iteritems():
             # calcular el pago de principal para cada calificacion
             if per > 0 and per <= nper:
                 ppay = np.abs(np.ppmt(i, per, nper, val, 0))
-                ppay = ppay * self._percent_amortizacion_por_calificacion[index]
-
+                ppay = np.round(ppay * self._percent_amortizacion_por_calificacion[index], 
+                                self._rounding)
                 ans.set_value(index, ppay)
             # despues del plazo original cualquiera que se pone al dia va a recaudo
             elif per > nper and index == 0:
@@ -382,7 +337,7 @@ class Cosecha_Credito:
 
         sf_trans = pd.Series(np.dot(np.transpose(self._matriz_de_transicion(row)),
                                     self._saldo_final_by_row(row)),
-                            index = self._alturas_mora)
+                            index=self._alturas_mora)
 
         if row + 1 <= self.ans_df.index[-1]:
             self._actualizar_saldo_inicial(row + 1, sf_trans)
@@ -413,7 +368,7 @@ class Cosecha_Credito:
                                                             self._rounding)
 
 
-    def _saldo_final_by_row(self, row, total = False):
+    def _saldo_final_by_row(self, row, total=False):
         """
         Obtiene una serie de saldos finales ordenados por calificacion
 
@@ -427,7 +382,7 @@ class Cosecha_Credito:
                           self.ans_df.loc[row, "saldo_final150"],
                           self.ans_df.loc[row, "saldo_final180"],
                           self.ans_df.loc[row, "saldo_final210"]],
-                         index = self._alturas_mora),
+                         index=self._alturas_mora),
                         self._rounding)
 
 
@@ -444,7 +399,7 @@ class Cosecha_Credito:
                           self.ans_df.loc[row, "saldo_inicial150"],
                           self.ans_df.loc[row, "saldo_inicial180"],
                           self.ans_df.loc[row, "saldo_inicial210"]],
-                         index = self._alturas_mora),
+                         index=self._alturas_mora),
                         self._rounding)
 
 
@@ -476,7 +431,7 @@ class Cosecha_Credito:
         return [self._tipo_tasa, self._spread_originacion[0]]
 
 
-    def get_balance (self, por_calif = False):
+    def get_balance (self, por_calif=False):
         """
         Construye el balance de la cosecha y lo exporta a un df
         se puede elegir entre vista por calificacion o vista agregada
@@ -485,16 +440,16 @@ class Cosecha_Credito:
             return self.ans_df
 
         else:
-            ans = pd.DataFrame(columns = ('saldo_inicial', 'desembolso',
+            ans = pd.DataFrame(columns=('saldo_inicial', 'desembolso',
                                           'amortizacion', 'prepago', 'castigo',
                                           'saldo_final'),
-                               index = self.ans_df.index)
+                               index=self.ans_df.index)
             for col in ans:
-                ans[col] = self.get_serie(serie_name = col, por_calif = False)
+                ans[col] = self.get_serie(serie_name=col, por_calif=False)
             return ans
 
 
-    def get_serie(self, serie_name = "saldo_final", por_calif = False):
+    def get_serie(self, serie_name="saldo_final", por_calif=False):
 
         serie_name = serie_name.lower()
         if serie_name == "desembolso":
@@ -513,7 +468,7 @@ class Cosecha_Credito:
         if por_calif == True:
             return ans
         else:
-            return ans.sum(axis = 1)
+            return ans.sum(axis=1)
 
 
     def get_index(self):
@@ -521,147 +476,6 @@ class Cosecha_Credito:
         Retorna el indice de fechas de la cosecha
         """
         return self.ans_df.index
-
-
-class Provision():
-
-    """
-    Construct an object with information for the provisions for a loan portfolio
-    on an homogeneous loan pool, where the loans share the same origination period.
-    """
-    def __init__(self, cosecha, prov_calif):
-
-        self._rounding = 2
-
-        self.cosecha = cosecha
-        self.prov_calif = prov_calif
-
-        # crear estructuras necesarias
-        self.ans_df = self._df_structure()
-        self._constructor_de_balance()
-
-
-    def _df_structure(self):
-        """
-        Crea la estructura del dataframe de salida
-        :return pandas dataframe
-        """
-
-        return pd.DataFrame(0.0,
-                            index = self.cosecha.get_index(),
-                            columns = ('saldo_inicial0', 'saldo_inicial30', 'saldo_inicial60',
-                            'saldo_inicial90', 'saldo_inicial120', 'saldo_inicial150',
-                            'saldo_inicial180', 'saldo_inicial210',
-                            'gasto0', 'gasto30', 'gasto60', 'gasto90',
-                            'gasto120', 'gasto150', 'gasto180', 'gasto210',
-                            'castigo0', 'castigo30', 'castigo60', 'castigo90',
-                            'castigo120', 'castigo150', 'castigo180', 'castigo210',
-                            'saldo_final0', 'saldo_final30', 'saldo_final60', 'saldo_final90',
-                            'saldo_final120', 'saldo_final150', 'saldo_final180', 'saldo_final210'))
-
-
-    def _constructor_de_balance(self):
-        """
-        Computa provisiones por calificacion
-        """
-
-        self._actualizar_saldo_final()
-        self._actualizar_saldo_inicial()
-        self._actualizar_castigo()
-        self._actualizar_gasto()
-
-
-    def _actualizar_saldo_final(self):
-        """
-        Computa el saldo final de provision para cada nivel de calificacion
-        tomando el saldo final de la cosecha en cada periodo
-        """
-        saldos = self.cosecha.get_serie(serie_name = "saldo_final", por_calif = True)
-
-        for key, val in self.prov_calif.items():
-            self.ans_df["saldo_final" + str(key)] = np.round(saldos["saldo_final" + str(key)] * val,
-                                                             self._rounding)
-
-
-    def _actualizar_saldo_inicial(self):
-        """
-        Actualiza el saldo inicial.
-        saldo inicial t+0  = 0.0,
-        saldo inicial t+1 = saldo inicial+0
-        """
-        for key in self.prov_calif:
-            self.ans_df["saldo_inicial" + str(key)] = self.ans_df["saldo_final" + str(key)].shift(1)
-        self.ans_df.fillna(0.0, inplace = True)
-
-
-    def _actualizar_castigo(self):
-        """
-        castigos pasan igual desde la cosecha
-
-        """
-        castigos = self.cosecha.get_serie(serie_name = "castigo", por_calif = True)
-        for key in self.prov_calif:
-            self.ans_df["castigo" + str(key)] = np.round(castigos["castigo" + str(key)],
-                                                        self._rounding)
-
-
-    def _actualizar_gasto(self):
-        """
-        castigo = saldo final - saldo inicial + castigo
-        """
-        for key in self.prov_calif:
-            self.ans_df["gasto" + str(key)] = np.round((self.ans_df["saldo_final" + str(key)]
-                                                        - self.ans_df["saldo_inicial" + str(key)]
-                                                        + self.ans_df["castigo" + str(key)]),
-                                                       self._rounding)
-
-
-    def get_balance (self, por_calif = False):
-        """
-        Construye el balance de la cosecha y lo exporta a un df
-        se puede elegir entre vista por calificacion o vista agregada
-        """
-        if por_calif == True:
-            return self.ans_df
-
-        else:
-            ans = pd.DataFrame(columns = ('saldo_inicial', 'desembolso', 'amortizacion',
-                                          'prepago', 'castigo', 'saldo_final'),
-                               index = self.ans_df.index)
-            for col in ans:
-                ans[col] = self.get_serie(serie_name = col, por_calif = False)
-            return ans
-
-
-    def get_serie(self, serie_name = "saldo_final", por_calif = False):
-
-        serie_name = serie_name.lower()
-        if serie_name == "desembolso":
-            ans = self.ans_df["desembolso0"]
-            por_calif = True
-        else:
-            ans = self.ans_df[[serie_name + str(0),
-                               serie_name + str(30),
-                               serie_name + str(60),
-                               serie_name + str(90),
-                               serie_name + str(120),
-                               serie_name + str(150),
-                               serie_name + str(180),
-                               serie_name + str(210)]]
-
-        if por_calif == True:
-            return ans
-        else:
-            return ans.sum(axis = 1)
-
-
-class Prueba():
-    def __init__(self, a , b):
-        self.a = a
-        self.b = b
-
-    def my_function(self):
-        return self.a + self.b
 
 
 def print_tabulate(cosecha):
@@ -674,10 +488,10 @@ def print_tabulate(cosecha):
     # https://pypi.python.org/pypi/tabulate
 
     print(tabulate(cosecha,
-                   headers = 'keys',
-                   numalign = 'right',
-                   tablefmt = 'fancy_grid',
-                   floatfmt = ",.2f"))
+                   headers='keys',
+                   numalign='right',
+                   tablefmt='fancy_grid',
+                   floatfmt=",.2f"))
 
 
 def save_to_xls(bol, name):
@@ -700,15 +514,15 @@ if __name__ == '__main__':
     print("Plazo de Originacion: ", x1.plazo())
     print("Tasas: ", x1.tipo_tasa())
 
-    #print(x1.get_serie(serie_name = "amortizacion", por_calif = True))
+    print(x1.get_serie(serie_name = "saldo_final", por_calif = False))
 
-    balance = x1.get_balance(por_calif = False)
-    #print_tabulate(balance)
+    balance = x1.get_balance(por_calif=False)
+    # print_tabulate(balance)
     # save_to_xls(False, 'cosecha')
 
-    #prov1 = Provision(x1, provision_por_calificacion())
-    #print(prov1.get_serie(serie_name = "gasto", por_calif = False))
-    #print("perdida: ", np.round(prov1.get_serie(serie_name = "gasto", por_calif = False).sum(), 2))
+    prov1 = Provision(x1, provision_por_calificacion())
+    print(prov1.get_serie(serie_name = "gasto", por_calif = False))
+    print("perdida: ", np.round(prov1.get_serie(serie_name = "gasto", por_calif = False).sum(), 2))
     # print_tabulate(prov1.prov_calif)
 
 

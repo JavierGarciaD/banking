@@ -4,10 +4,11 @@ Created on 8/06/2017
 @author: spectre
 '''
 
-from credit.constructor import *
+from credit.cosecha import *
 import pytest
 
 class TestEstructuraTemporal(object):
+    
     
     def test_one(self):
         pass

@@ -1,6 +1,6 @@
 
 
-import credit.prepayment
+import credit.prepago
 import interest_rates.models
 import pandas as pd
 
@@ -26,7 +26,7 @@ def settings_cosecha():
                                                      fecha_originacion, 
                                                      0.22)
 
-    vector_prepago = credit.prepayment.psa(nper = max_forecast,
+    vector_prepago = credit.prepago.psa(nper = max_forecast,
                                            ceil = 0.03,
                                            stable_per = 12)
 
@@ -76,9 +76,9 @@ def settings_cosecha():
 
 def provision_por_calificacion():
     
-    return {0 : 0.03,
-            30 : 0.05,
-            60 : 0.15,
+    return {0 : 0.10,
+            30 : 0.15,
+            60 : 0.25,
             90 : 0.40,
             120 : 0.60,
             150 : 0.80,
