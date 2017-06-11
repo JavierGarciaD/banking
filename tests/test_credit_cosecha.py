@@ -5,8 +5,7 @@
 :since: 10/06/2017
 :author: spectre
 '''
-from _datetime import datetime
-
+from Cython.Compiler.Errors import message
 import pytest
 
 from credit.cosecha2 import rolling_structure
@@ -21,8 +20,10 @@ def matrix1():
                          [0.0, 0.5, 0.5],
                          [0.0, 0.0, 1.0]])}
 
+
 @pytest.fixture()
 def ans1_6():
+    ''' answer for matrix 1 at 6 months'''
     return np.matrix([[0.59049],
                       [0.13981],
                       [0.2697]])
@@ -36,11 +37,10 @@ def matrix3():
 
 @pytest.fixture()
 def ans3_36():
+    ''' answer for matrix 3 at 36 months'''
     return np.matrix([[0.2647059],
                       [0.3235294],
                       [0.4117647]])
-
-
 
 
 @pytest.fixture()
@@ -106,13 +106,11 @@ def test_value_for_key_error():
     '''
     :summary: the key is greater than 12
     '''
-    with pytest.raises(KeyError) as exc_info:
+    with pytest.raises(KeyError, message = 'the year only have 12 months'):
         value_for_key(matrix2(), 24)
-
-    assert exc_info.type == KeyError
 
 
 
 
 if __name__ == '__main__':
-    pytest.main(['-v', '-s'])
+    pytest.main(['-s', '-v', 'test_credit_cosecha.py'])
