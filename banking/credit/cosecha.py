@@ -205,9 +205,8 @@ class Cosecha_Credito:
 
     def _estructura_temporal_cartera(self):
         """
-        construye un diccionario con la estructura temporal de la cartera por calificacion
-        aplicando la matriz de transicion para cada periodo
-
+        construye un diccionario con la estructura temporal de la cartera por
+        calificacion aplicando la matriz de transicion para cada periodo
         """
         # crea un diccionario vacio con n keys desde la fecha de originacion
         dates_index = pd.date_range(self.fecha_originacion(), periods=self._max_forecast,
@@ -236,6 +235,7 @@ class Cosecha_Credito:
 
 
         return ans_dict
+
 
     def _tasas_full_nmv(self):
         """
@@ -346,7 +346,8 @@ class Cosecha_Credito:
     def _aplicar_transicion(self, row):
         """
         Apply a transition matrix to a vector of balances for delinquency,
-        update end _constructor_de_balance of month 0 as beginning _constructor_de_balance month 1
+        update end _constructor_de_balance of month 0 as
+        beginning _constructor_de_balance month 1
         """
 
         sf_trans = pd.Series(np.dot(np.transpose(self._matriz_de_transicion(row)),
@@ -387,7 +388,7 @@ class Cosecha_Credito:
             vector_final_con_transicion.get_value(210),
             self._rounding)
 
-    def _saldo_final_by_row(self, row, total=False):
+    def _saldo_final_by_row(self, row):
         """
         Obtiene una serie de saldos finales ordenados por calificacion
 
@@ -449,7 +450,7 @@ class Cosecha_Credito:
         Construye el balance de la cosecha y lo exporta a un df
         se puede elegir entre vista por calificacion o vista agregada
         """
-        if por_calif == True:
+        if por_calif:
             return self.ans_df
 
         else:

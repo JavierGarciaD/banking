@@ -8,6 +8,8 @@
 # from common.presentation import print_tabulate
 import numpy as np
 import pandas as pd
+from banking.interest_rates.conversion import efectiva_a_nmv
+from banking.interest_rates.conversion import componer_efectivas
 
 
 def output_structure(sdate, nper, scores):
@@ -103,7 +105,7 @@ def value_for_key(dict_matrix, key):
 
 def tasas_full_nmv(tipo_tasa, spreads_vector, index_vector):
     """
-    :summary: compute monthly nominal rate from a series of annual rates.
+    Compute monthly nominal rate from a series of annual rates.
     Computation formula given the index characteristics.
 
     :param tipo_tasa: 'FIJA', 'DTF', 'IBR', 'IPC'
@@ -130,22 +132,14 @@ def tasas_full_nmv(tipo_tasa, spreads_vector, index_vector):
         raise ValueError('Rate type unknown!', tipo_tasa)
 
 
-def efectiva_a_nmv(vector_a):
-    """
-
-    :param vector_a:
-    :return:
-    """
-    return vector_a.apply(lambda tasa: (1 + tasa) ** (1 / 12) - 1)
+def Cosecha(settings):
 
 
-def componer_efectivas(vector_a, vector_b):
-    """
-    :param vector_a:
-    :param vector_b:
-    :return:
-    """
-    return (1 + vector_a) * (1 + vector_b) - 1
+
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -165,7 +159,4 @@ if __name__ == '__main__':
 
     output = tasas_full_nmv('DTF', spread_orig, vector_tasas_indice)
 
-    a = timeit.Timer("tasas_full_nmv('DTF', spread_orig, vector_tasas_indice)",
-                     setup="from __main__ import tasas_full_nmv, spread_orig, \
-                            vector_tasas_indice").timeit(number=1000)
-    print(a)
+    print(output)
