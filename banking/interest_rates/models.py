@@ -1,10 +1,11 @@
-'''
+"""
 Created on 11/10/2016
 
-:author: 
+:author:
 :description: Interest rates models
-'''
+"""
 import pandas as pd
+
 
 def fixed(nper, fecha_inicial, level):
     """
@@ -12,5 +13,5 @@ def fixed(nper, fecha_inicial, level):
     """
     dates_index = pd.date_range(fecha_inicial, periods = nper, freq = 'M')
     
-    return pd.Series([level] * nper, index = dates_index)    
-     
+    return pd.Series([level] * nper, index = dates_index)
+

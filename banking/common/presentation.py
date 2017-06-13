@@ -1,8 +1,8 @@
-'''
+"""
 Created on 9/06/2017
 
 @author: spectre
-'''
+"""
 from os.path import expanduser
 from tabulate import tabulate
 # https://pypi.python.org/pypi/tabulate

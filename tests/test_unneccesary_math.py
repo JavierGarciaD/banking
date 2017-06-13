@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # test_credit_cosecha
-'''
+"""
 :summary
 :since 10/06/2017
 :author: Javier Garcia
-'''
+"""
 import pytest
 
 #

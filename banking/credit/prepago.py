@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 :author: MacroTrader
 :email:  javier.macro.trader@gmail.com
 :summary: different pre-payment models to choose from
 
-'''
+"""
 import numpy as np
 
 

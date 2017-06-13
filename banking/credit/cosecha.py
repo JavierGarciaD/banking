@@ -1,4 +1,3 @@
-
 from sphinx.util.inspect import inspect
 
 from develop_testing.pruebas1 import settings_cosecha
@@ -7,7 +6,6 @@ import pandas as pd
 
 
 class Cosecha_Credito:
-
     def __init__(self, settings):
         """
         Construct an object with information for a loan portfolio on
@@ -29,13 +27,14 @@ class Cosecha_Credito:
         self._spread_originacion = np.round(settings['spread_originacion'], 6)
 
         self._vector_prepago = settings['vector_prepago']
-        self._percent_prepago_por_calificacion = settings['percent_prepago_por_calificacion']
+        self._percent_prepago_por_calificacion = settings[
+            'percent_prepago_por_calificacion']
 
         self._matrices_transcicion = settings['matrices_transicion']
-        self._percent_amortizacion_por_calificacion = settings['percent_recaudo_por_calificacion']
-        self._percent_castigo_por_calificacion = settings['percent_castigo_por_calificacion']
-
-
+        self._percent_amortizacion_por_calificacion = settings[
+            'percent_recaudo_por_calificacion']
+        self._percent_castigo_por_calificacion = settings[
+            'percent_castigo_por_calificacion']
 
         # crear estructuras necesarias para operacion
         self.ans_df = self._df_structure()
@@ -45,7 +44,6 @@ class Cosecha_Credito:
         # llamado a la funcion principal que construye el balance de la cosecha
         # el objeto se crea al inicializar la clase
         self._constructor_de_balance()
-
 
     def _constructor_de_balance(self):
         """
@@ -63,7 +61,8 @@ class Cosecha_Credito:
 
             # hacer desembolso en t+0
             if row == self.fecha_originacion():
-                self.ans_df.loc[self._fecha_originacion, 'desembolso0'] = self._desembolso
+                self.ans_df.loc[
+                    self._fecha_originacion, 'desembolso0'] = self._desembolso
 
             self._prepago_por_calificacion(row)
             self._castigo_por_calificacion(row)
@@ -73,8 +72,6 @@ class Cosecha_Credito:
 
         return self.ans_df
 
-
-
     def _df_structure(self):
         """
         Crea la estructura del dataframe de salida
@@ -82,73 +79,87 @@ class Cosecha_Credito:
         """
 
         dates_index = pd.date_range(self.fecha_originacion(),
-                                    periods = self._max_forecast,
-                                    freq = 'M')
+                                    periods=self._max_forecast,
+                                    freq='M')
 
         return pd.DataFrame(0.0,
-                            index = dates_index,
-                            columns = ('saldo_inicial0', 'saldo_inicial30',
-                            'saldo_inicial60', 'saldo_inicial90', 'saldo_inicial120',
-                            'saldo_inicial150', 'saldo_inicial180', 'saldo_inicial210',
-                            'desembolso0',
-                            'amortizacion0', 'amortizacion30', 'amortizacion60', 'amortizacion90',
-                            'amortizacion120', 'amortizacion150', 'amortizacion180', 'amortizacion210',
-                            'prepago0', 'prepago30', 'prepago60', 'prepago90',
-                            'prepago120', 'prepago150', 'prepago180', 'prepago210',
-                            'castigo0', 'castigo30', 'castigo60', 'castigo90',
-                            'castigo120', 'castigo150', 'castigo180', 'castigo210',
-                            'saldo_final0', 'saldo_final30', 'saldo_final60', 'saldo_final90',
-                            'saldo_final120', 'saldo_final150', 'saldo_final180',
-                            'saldo_final210'))
-
+                            index=dates_index,
+                            columns=('saldo_inicial0', 'saldo_inicial30',
+                                     'saldo_inicial60', 'saldo_inicial90',
+                                     'saldo_inicial120',
+                                     'saldo_inicial150', 'saldo_inicial180',
+                                     'saldo_inicial210',
+                                     'desembolso0',
+                                     'amortizacion0', 'amortizacion30', 'amortizacion60',
+                                     'amortizacion90',
+                                     'amortizacion120', 'amortizacion150',
+                                     'amortizacion180', 'amortizacion210',
+                                     'prepago0', 'prepago30', 'prepago60', 'prepago90',
+                                     'prepago120', 'prepago150', 'prepago180',
+                                     'prepago210',
+                                     'castigo0', 'castigo30', 'castigo60', 'castigo90',
+                                     'castigo120', 'castigo150', 'castigo180',
+                                     'castigo210',
+                                     'saldo_final0', 'saldo_final30', 'saldo_final60',
+                                     'saldo_final90',
+                                     'saldo_final120', 'saldo_final150',
+                                     'saldo_final180',
+                                     'saldo_final210'))
 
     def _actualizar_saldo_final(self, row):
         """
         Actualizar saldos finales
         Saldo Inicial + Desembolso - Amortizacion - Prepago - Castigo
         """
-        self.ans_df.loc[row, "saldo_final0"] = np.round((self.ans_df.loc[row, "saldo_inicial0"]
-                                                        + self.ans_df.loc[row, "desembolso0"]
-                                                        - self.ans_df.loc[row, "amortizacion0"]
-                                                        - self.ans_df.loc[row, "prepago0"]
-                                                        - self.ans_df.loc[row, "castigo0"]),
-                                                        self._rounding)
-        self.ans_df.loc[row, "saldo_final30"] = np.round((self.ans_df.loc[row, "saldo_inicial30"]
-                                                         - self.ans_df.loc[row, "amortizacion30"]
-                                                         - self.ans_df.loc[row, "prepago30"]
-                                                         - self.ans_df.loc[row, "castigo30"]),
-                                                         self._rounding)
-        self.ans_df.loc[row, "saldo_final60"] = np.round((self.ans_df.loc[row, "saldo_inicial60"]
-                                                         - self.ans_df.loc[row, "amortizacion60"]
-                                                         - self.ans_df.loc[row, "prepago60"]
-                                                         - self.ans_df.loc[row, "castigo60"]),
-                                                         self._rounding)
-        self.ans_df.loc[row, "saldo_final90"] = np.round((self.ans_df.loc[row, "saldo_inicial90"]
-                                                         - self.ans_df.loc[row, "amortizacion90"]
-                                                         - self.ans_df.loc[row, "prepago90"]
-                                                         - self.ans_df.loc[row, "castigo90"]),
-                                                         self._rounding)
-        self.ans_df.loc[row, "saldo_final120"] = np.round ((self.ans_df.loc[row, "saldo_inicial120"]
-                                                          - self.ans_df.loc[row, "amortizacion120"]
-                                                          - self.ans_df.loc[row, "prepago120"]
-                                                          - self.ans_df.loc[row, "castigo120"]),
-                                                          self._rounding)
-        self.ans_df.loc[row, "saldo_final150"] = np.round ((self.ans_df.loc[row, "saldo_inicial150"]
-                                                          - self.ans_df.loc[row, "amortizacion150"]
-                                                          - self.ans_df.loc[row, "prepago150"]
-                                                          - self.ans_df.loc[row, "castigo150"]),
-                                                          self._rounding)
-        self.ans_df.loc[row, "saldo_final180"] = np.round((self.ans_df.loc[row, "saldo_inicial180"]
-                                                          - self.ans_df.loc[row, "amortizacion180"]
-                                                          - self.ans_df.loc[row, "prepago180"]
-                                                          - self.ans_df.loc[row, "castigo180"]),
-                                                          self._rounding)
-        self.ans_df.loc[row, "saldo_final210"] = np.round((self.ans_df.loc[row, "saldo_inicial210"]
-                                                          - self.ans_df.loc[row, "amortizacion210"]
-                                                          - self.ans_df.loc[row, "prepago210"]
-                                                          - self.ans_df.loc[row, "castigo210"]),
-                                                          self._rounding)
-
+        self.ans_df.loc[row, "saldo_final0"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial0"]
+                 + self.ans_df.loc[row, "desembolso0"]
+                 - self.ans_df.loc[row, "amortizacion0"]
+                 - self.ans_df.loc[row, "prepago0"]
+                 - self.ans_df.loc[row, "castigo0"]),
+                self._rounding)
+        self.ans_df.loc[row, "saldo_final30"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial30"]
+                 - self.ans_df.loc[row, "amortizacion30"]
+                 - self.ans_df.loc[row, "prepago30"]
+                 - self.ans_df.loc[row, "castigo30"]),
+                self._rounding)
+        self.ans_df.loc[row, "saldo_final60"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial60"]
+                 - self.ans_df.loc[row, "amortizacion60"]
+                 - self.ans_df.loc[row, "prepago60"]
+                 - self.ans_df.loc[row, "castigo60"]),
+                self._rounding)
+        self.ans_df.loc[row, "saldo_final90"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial90"]
+                 - self.ans_df.loc[row, "amortizacion90"]
+                 - self.ans_df.loc[row, "prepago90"]
+                 - self.ans_df.loc[row, "castigo90"]),
+                self._rounding)
+        self.ans_df.loc[row, "saldo_final120"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial120"]
+                 - self.ans_df.loc[row, "amortizacion120"]
+                 - self.ans_df.loc[row, "prepago120"]
+                 - self.ans_df.loc[row, "castigo120"]),
+                self._rounding)
+        self.ans_df.loc[row, "saldo_final150"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial150"]
+                 - self.ans_df.loc[row, "amortizacion150"]
+                 - self.ans_df.loc[row, "prepago150"]
+                 - self.ans_df.loc[row, "castigo150"]),
+                self._rounding)
+        self.ans_df.loc[row, "saldo_final180"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial180"]
+                 - self.ans_df.loc[row, "amortizacion180"]
+                 - self.ans_df.loc[row, "prepago180"]
+                 - self.ans_df.loc[row, "castigo180"]),
+                self._rounding)
+        self.ans_df.loc[row, "saldo_final210"] = np.round(
+                (self.ans_df.loc[row, "saldo_inicial210"]
+                 - self.ans_df.loc[row, "amortizacion210"]
+                 - self.ans_df.loc[row, "prepago210"]
+                 - self.ans_df.loc[row, "castigo210"]),
+                self._rounding)
 
     def _prepago_por_calificacion(self, row):
         """
@@ -172,7 +183,6 @@ class Cosecha_Credito:
         self.ans_df.loc[row, "prepago180"] = np.round(c.get_value(180), self._rounding)
         self.ans_df.loc[row, "prepago210"] = np.round(c.get_value(210), self._rounding)
 
-
     def _castigo_por_calificacion(self, row):
         """
         obtiene el % de castigo para cada calificacion
@@ -193,7 +203,6 @@ class Cosecha_Credito:
         self.ans_df.loc[row, "castigo180"] = np.round(c.get_value(180), self._rounding)
         self.ans_df.loc[row, "castigo210"] = np.round(c.get_value(210), self._rounding)
 
-
     def _estructura_temporal_cartera(self):
         """
         construye un diccionario con la estructura temporal de la cartera por calificacion
@@ -201,31 +210,32 @@ class Cosecha_Credito:
 
         """
         # crea un diccionario vacio con n keys desde la fecha de originacion
-        dates_index = pd.date_range(self.fecha_originacion(), periods = self._max_forecast, freq = 'M')
+        dates_index = pd.date_range(self.fecha_originacion(), periods=self._max_forecast,
+                                    freq='M')
         ans_dict = dict.fromkeys(dates_index)
 
         for key in dates_index:
             m = self._matriz_de_transicion(key)
             if key == dates_index[0]:
                 # mes cero, desembolso
-                ans_dict[dates_index[0]] = pd.Series([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                                                     index = self._alturas_mora)
+                ans_dict[dates_index[0]] = pd.Series(
+                        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        index=self._alturas_mora)
                 # aplicar transicion y actualizar t+1
                 ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                                index = self._alturas_mora)
+                                index=self._alturas_mora)
                 ans_dict[key + 1] = ans
 
             else:
 
                 ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                                index = self._alturas_mora)
+                                index=self._alturas_mora)
                 ans_dict[key + 1] = ans
 
         # TODO: refactor para no repetir instrucciones
 
 
         return ans_dict
-
 
     def _tasas_full_nmv(self):
         """
@@ -235,15 +245,15 @@ class Cosecha_Credito:
         # TODO: implementar diferentes indices
         # TODO: implementar reprecio
         if self._tipo_tasa == "FIJA":
-            return np.round(self._spread_originacion.apply(lambda x: (1 + x) ** (1 / 12) - 1),
-                            6)
+            return np.round(
+                self._spread_originacion.apply(lambda x: (1 + x) ** (1 / 12) - 1),
+                6)
         elif self._tipo_tasa == "DTF":
             pass
         elif self._tipo_tasa == "IPC":
             pass
         elif self._tipo_tasa == "IBR1":
             pass
-
 
     def _amortizacion_por_calificacion(self, row):
         """
@@ -256,64 +266,70 @@ class Cosecha_Credito:
         per = row.to_period('M') - self._fecha_originacion.to_period('M')
 
         # df de salida
-        ans = pd.Series(0.0, index = self._alturas_mora)
-
+        ans = pd.Series(0.0, index=self._alturas_mora)
 
         for index, val in k.iteritems():
             # calcular el pago de principal para cada calificacion
             if per > 0 and per <= nper:
                 ppay = np.abs(np.ppmt(i, per, nper, val, 0))
-                ppay = np.round(ppay * self._percent_amortizacion_por_calificacion[index],
-                                self._rounding)
+                ppay = np.round(
+                    ppay * self._percent_amortizacion_por_calificacion[index],
+                    self._rounding)
                 ans.set_value(index, ppay)
             # despues del plazo original cualquiera que se pone al dia va a recaudo
             elif per > nper and index == 0:
                 ans.set_value(index, self.ans_df.loc[row, "saldo_inicial0"])
 
-
         # actualizar el dataframe de salida
         # debe verificar que el valor a amortizar existe despues de castigo y prepago
-        self.ans_df.loc[row, "amortizacion0"] = np.round(min((self.ans_df.loc[row, "saldo_inicial0"]
-                                                                - self.ans_df.loc[row, "prepago0"]
-                                                                - self.ans_df.loc[row, "castigo0"]),
-                                                               ans.get_value(0)),
-                                                         self._rounding)
-        self.ans_df.loc[row, "amortizacion30"] = np.round(min((self.ans_df.loc[row, "saldo_inicial30"]
-                                                                - self.ans_df.loc[row, "prepago30"]
-                                                                - self.ans_df.loc[row, "castigo30"]),
-                                                               ans.get_value(30)),
-                                                          self._rounding)
-        self.ans_df.loc[row, "amortizacion60"] = np.round(min((self.ans_df.loc[row, "saldo_inicial60"]
-                                                                - self.ans_df.loc[row, "prepago60"]
-                                                                - self.ans_df.loc[row, "castigo60"]),
-                                                               ans.get_value(60)),
-                                                          self._rounding)
-        self.ans_df.loc[row, "amortizacion90"] = np.round(min((self.ans_df.loc[row, "saldo_inicial90"]
-                                                                - self.ans_df.loc[row, "prepago90"]
-                                                                - self.ans_df.loc[row, "castigo90"]),
-                                                               ans.get_value(90)),
-                                                          self._rounding)
-        self.ans_df.loc[row, "amortizacion120"] = np.round(min((self.ans_df.loc[row, "saldo_inicial120"]
-                                                                - self.ans_df.loc[row, "prepago120"]
-                                                                - self.ans_df.loc[row, "castigo120"]),
-                                                               ans.get_value(120)),
-                                                           self._rounding)
-        self.ans_df.loc[row, "amortizacion150"] = np.round(min((self.ans_df.loc[row, "saldo_inicial150"]
-                                                                - self.ans_df.loc[row, "prepago150"]
-                                                                - self.ans_df.loc[row, "castigo150"]),
-                                                               ans.get_value(150)),
-                                                           self._rounding)
-        self.ans_df.loc[row, "amortizacion180"] = np.round(min((self.ans_df.loc[row, "saldo_inicial180"]
-                                                                - self.ans_df.loc[row, "prepago180"]
-                                                                - self.ans_df.loc[row, "castigo180"]),
-                                                               ans.get_value(180)),
-                                                           self._rounding)
-        self.ans_df.loc[row, "amortizacion210"] = np.round(min((self.ans_df.loc[row, "saldo_inicial210"]
-                                                                - self.ans_df.loc[row, "prepago210"]
-                                                                - self.ans_df.loc[row, "castigo210"]),
-                                                               ans.get_value(210)),
-                                                           self._rounding)
-
+        self.ans_df.loc[row, "amortizacion0"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial0"]
+                 - self.ans_df.loc[row, "prepago0"]
+                 - self.ans_df.loc[row, "castigo0"]),
+                ans.get_value(0)),
+            self._rounding)
+        self.ans_df.loc[row, "amortizacion30"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial30"]
+                 - self.ans_df.loc[row, "prepago30"]
+                 - self.ans_df.loc[row, "castigo30"]),
+                ans.get_value(30)),
+            self._rounding)
+        self.ans_df.loc[row, "amortizacion60"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial60"]
+                 - self.ans_df.loc[row, "prepago60"]
+                 - self.ans_df.loc[row, "castigo60"]),
+                ans.get_value(60)),
+            self._rounding)
+        self.ans_df.loc[row, "amortizacion90"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial90"]
+                 - self.ans_df.loc[row, "prepago90"]
+                 - self.ans_df.loc[row, "castigo90"]),
+                ans.get_value(90)),
+            self._rounding)
+        self.ans_df.loc[row, "amortizacion120"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial120"]
+                 - self.ans_df.loc[row, "prepago120"]
+                 - self.ans_df.loc[row, "castigo120"]),
+                ans.get_value(120)),
+            self._rounding)
+        self.ans_df.loc[row, "amortizacion150"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial150"]
+                 - self.ans_df.loc[row, "prepago150"]
+                 - self.ans_df.loc[row, "castigo150"]),
+                ans.get_value(150)),
+            self._rounding)
+        self.ans_df.loc[row, "amortizacion180"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial180"]
+                 - self.ans_df.loc[row, "prepago180"]
+                 - self.ans_df.loc[row, "castigo180"]),
+                ans.get_value(180)),
+            self._rounding)
+        self.ans_df.loc[row, "amortizacion210"] = np.round(
+            min((self.ans_df.loc[row, "saldo_inicial210"]
+                 - self.ans_df.loc[row, "prepago210"]
+                 - self.ans_df.loc[row, "castigo210"]),
+                ans.get_value(210)),
+            self._rounding)
 
     def _matriz_de_transicion(self, row):
         """
@@ -327,21 +343,18 @@ class Cosecha_Credito:
         else:
             return self._matrices_transcicion[1]
 
-
     def _aplicar_transicion(self, row):
         """
         Apply a transition matrix to a vector of balances for delinquency,
         update end _constructor_de_balance of month 0 as beginning _constructor_de_balance month 1
         """
 
-
         sf_trans = pd.Series(np.dot(np.transpose(self._matriz_de_transicion(row)),
                                     self._saldo_final_by_row(row)),
-                            index = self._alturas_mora)
+                             index=self._alturas_mora)
 
         if row + 1 <= self.ans_df.index[-1]:
             self._actualizar_saldo_inicial(row + 1, sf_trans)
-
 
     def _actualizar_saldo_inicial(self, row, vector_final_con_transicion):
         """
@@ -349,42 +362,47 @@ class Cosecha_Credito:
         periodo anterior aplicada la matriz de transicion por calificacion
         """
 
+        self.ans_df.loc[row, "saldo_inicial0"] = np.round(
+            vector_final_con_transicion.get_value(0),
+            self._rounding)
+        self.ans_df.loc[row, "saldo_inicial30"] = np.round(
+            vector_final_con_transicion.get_value(30),
+            self._rounding)
+        self.ans_df.loc[row, "saldo_inicial60"] = np.round(
+            vector_final_con_transicion.get_value(60),
+            self._rounding)
+        self.ans_df.loc[row, "saldo_inicial90"] = np.round(
+            vector_final_con_transicion.get_value(90),
+            self._rounding)
+        self.ans_df.loc[row, "saldo_inicial120"] = np.round(
+            vector_final_con_transicion.get_value(120),
+            self._rounding)
+        self.ans_df.loc[row, "saldo_inicial150"] = np.round(
+            vector_final_con_transicion.get_value(150),
+            self._rounding)
+        self.ans_df.loc[row, "saldo_inicial180"] = np.round(
+            vector_final_con_transicion.get_value(180),
+            self._rounding)
+        self.ans_df.loc[row, "saldo_inicial210"] = np.round(
+            vector_final_con_transicion.get_value(210),
+            self._rounding)
 
-        self.ans_df.loc[row, "saldo_inicial0"] = np.round(vector_final_con_transicion.get_value(0),
-                                                          self._rounding)
-        self.ans_df.loc[row, "saldo_inicial30"] = np.round(vector_final_con_transicion.get_value(30),
-                                                           self._rounding)
-        self.ans_df.loc[row, "saldo_inicial60"] = np.round(vector_final_con_transicion.get_value(60),
-                                                           self._rounding)
-        self.ans_df.loc[row, "saldo_inicial90"] = np.round(vector_final_con_transicion.get_value(90),
-                                                           self._rounding)
-        self.ans_df.loc[row, "saldo_inicial120"] = np.round(vector_final_con_transicion.get_value(120),
-                                                            self._rounding)
-        self.ans_df.loc[row, "saldo_inicial150"] = np.round(vector_final_con_transicion.get_value(150),
-                                                            self._rounding)
-        self.ans_df.loc[row, "saldo_inicial180"] = np.round(vector_final_con_transicion.get_value(180),
-                                                            self._rounding)
-        self.ans_df.loc[row, "saldo_inicial210"] = np.round(vector_final_con_transicion.get_value(210),
-                                                            self._rounding)
-
-
-    def _saldo_final_by_row(self, row, total = False):
+    def _saldo_final_by_row(self, row, total=False):
         """
         Obtiene una serie de saldos finales ordenados por calificacion
 
         """
 
         return np.round(pd.Series([self.ans_df.loc[row, "saldo_final0"],
-                          self.ans_df.loc[row, "saldo_final30"],
-                          self.ans_df.loc[row, "saldo_final60"],
-                          self.ans_df.loc[row, "saldo_final90"],
-                          self.ans_df.loc[row, "saldo_final120"],
-                          self.ans_df.loc[row, "saldo_final150"],
-                          self.ans_df.loc[row, "saldo_final180"],
-                          self.ans_df.loc[row, "saldo_final210"]],
-                         index = self._alturas_mora),
+                                   self.ans_df.loc[row, "saldo_final30"],
+                                   self.ans_df.loc[row, "saldo_final60"],
+                                   self.ans_df.loc[row, "saldo_final90"],
+                                   self.ans_df.loc[row, "saldo_final120"],
+                                   self.ans_df.loc[row, "saldo_final150"],
+                                   self.ans_df.loc[row, "saldo_final180"],
+                                   self.ans_df.loc[row, "saldo_final210"]],
+                                  index=self._alturas_mora),
                         self._rounding)
-
 
     def _saldo_inicial_by_row(self, row):
         """
@@ -392,16 +410,15 @@ class Cosecha_Credito:
         """
 
         return np.round(pd.Series([self.ans_df.loc[row, "saldo_inicial0"],
-                          self.ans_df.loc[row, "saldo_inicial30"],
-                          self.ans_df.loc[row, "saldo_inicial60"],
-                          self.ans_df.loc[row, "saldo_inicial90"],
-                          self.ans_df.loc[row, "saldo_inicial120"],
-                          self.ans_df.loc[row, "saldo_inicial150"],
-                          self.ans_df.loc[row, "saldo_inicial180"],
-                          self.ans_df.loc[row, "saldo_inicial210"]],
-                         index = self._alturas_mora),
+                                   self.ans_df.loc[row, "saldo_inicial30"],
+                                   self.ans_df.loc[row, "saldo_inicial60"],
+                                   self.ans_df.loc[row, "saldo_inicial90"],
+                                   self.ans_df.loc[row, "saldo_inicial120"],
+                                   self.ans_df.loc[row, "saldo_inicial150"],
+                                   self.ans_df.loc[row, "saldo_inicial180"],
+                                   self.ans_df.loc[row, "saldo_inicial210"]],
+                                  index=self._alturas_mora),
                         self._rounding)
-
 
     def producto(self):
         """
@@ -409,13 +426,11 @@ class Cosecha_Credito:
         """
         return self._producto
 
-
     def plazo(self):
         """
         :return: int
         """
         return self._plazo
-
 
     def fecha_originacion(self):
         """
@@ -423,15 +438,13 @@ class Cosecha_Credito:
         """
         return self._fecha_originacion
 
-
     def tipo_tasa(self):
         """
         :return: list [tipo tasa, valor]
         """
         return [self._tipo_tasa, self._spread_originacion[0]]
 
-
-    def get_balance (self, por_calif = False):
+    def get_balance(self, por_calif=False):
         """
         Construye el balance de la cosecha y lo exporta a un df
         se puede elegir entre vista por calificacion o vista agregada
@@ -440,16 +453,15 @@ class Cosecha_Credito:
             return self.ans_df
 
         else:
-            ans = pd.DataFrame(columns = ('saldo_inicial', 'desembolso',
-                                          'amortizacion', 'prepago', 'castigo',
-                                          'saldo_final'),
-                               index = self.ans_df.index)
+            ans = pd.DataFrame(columns=('saldo_inicial', 'desembolso',
+                                        'amortizacion', 'prepago', 'castigo',
+                                        'saldo_final'),
+                               index=self.ans_df.index)
             for col in ans:
-                ans[col] = self.get_serie(serie_name = col, por_calif = False)
+                ans[col] = self.get_serie(serie_name=col, por_calif=False)
             return ans
 
-
-    def get_serie(self, serie_name = "saldo_final", por_calif = False):
+    def get_serie(self, serie_name="saldo_final", por_calif=False):
 
         serie_name = serie_name.lower()
         if serie_name == "desembolso":
@@ -468,17 +480,13 @@ class Cosecha_Credito:
         if por_calif == True:
             return ans
         else:
-            return ans.sum(axis = 1)
-
+            return ans.sum(axis=1)
 
     def get_index(self):
         """
         Retorna el indice de fechas de la cosecha
         """
         return self.ans_df.index
-
-
-
 
 
 def estructura_temporal_cartera(m_dict, start_date, nper):
@@ -492,7 +500,6 @@ def estructura_temporal_cartera(m_dict, start_date, nper):
     :param nper: numero de periodos a proyectar
 
     :type m_dict: dict
-    :type date1: datetime
     :type nper: int
 
     :return:
@@ -500,7 +507,7 @@ def estructura_temporal_cartera(m_dict, start_date, nper):
     """
 
     # crea un diccionario vacio con n keys desde la fecha de originacion
-    dates_index = pd.date_range(start_date, periods = nper, freq = 'M')
+    dates_index = pd.date_range(start_date, periods=nper, freq='M')
     ans_dict = dict.fromkeys(dates_index)
 
     for key in m_dict:
@@ -508,30 +515,26 @@ def estructura_temporal_cartera(m_dict, start_date, nper):
         scores = m_dict(key).keys()
         if key == dates_index[0]:
             # mes cero, desembolso
-            ans_dict[dates_index[0]] = pd.Series([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                                                 index = scores)
+            ans_dict[dates_index[0]] = pd.Series(
+                    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    index=scores)
             # aplicar transicion y actualizar t+1
             ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                            index = scores)
+                            index=scores)
             ans_dict[key + 1] = ans
 
         else:
             ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                            index = scores)
+                            index=scores)
             ans_dict[key + 1] = ans
 
         return ans_dict
 
 
-
 if __name__ == '__main__':
-    # x1 = Cosecha_Credito(settings_cosecha())
-    # print("Linea de negocio: ", x1.producto())
-    # print("Fecha de Originacion: ", x1.fecha_originacion())
-    # print("Plazo de Originacion: ", x1.plazo())
-    # print("Tasas: ", x1.tipo_tasa())
-    # print(x1.get_serie(serie_name = "saldo_final", por_calif = False))
-    m = []
-    n = 12
-    x = pd.to_datetime('12-1-2017')
-    help(estructura_temporal_cartera)
+    x1 = Cosecha_Credito(settings_cosecha())
+    print("Linea de negocio: ", x1.producto())
+    print("Fecha de Originacion: ", x1.fecha_originacion())
+    print("Plazo de Originacion: ", x1.plazo())
+    print("Tasas: ", x1.tipo_tasa())
+    print(x1.get_serie(serie_name="saldo_final", por_calif=False))
