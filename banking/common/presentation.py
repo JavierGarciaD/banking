@@ -13,12 +13,10 @@ def print_tabulate(data):
     :param: vintage: credit vintage object
     :return: console output
     """
-
-
     print(tabulate(data,
                    headers = 'keys',
                    numalign = 'right',
-                   tablefmt = 'fancy_grid',
+                   tablefmt = 'psql',
                    floatfmt = ",.2f"))
 
 

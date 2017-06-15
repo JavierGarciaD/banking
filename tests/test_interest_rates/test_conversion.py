@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # test_credit_cosecha
 """
-:summary:
+
 :since: Jun 2017
 :author: Javier Garcia
 """
@@ -9,7 +9,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from interest_rates.conversion import componer_efectivas
-from interest_rates.conversion import efectiva_a_nmv
+from interest_rates.conversion import ea_a_nmv
 
 
 @pytest.fixture()

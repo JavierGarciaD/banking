@@ -7,7 +7,7 @@
 """
 
 
-def efectiva_a_nmv(vector_a):
+def ea_a_nmv(vector_a):
     """
 
     :param vector_a:

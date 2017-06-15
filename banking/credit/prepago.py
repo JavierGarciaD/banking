@@ -6,6 +6,7 @@
 
 """
 import numpy as np
+import pandas as pd
 
 
 def zero(nper):
@@ -27,13 +28,15 @@ def linear(nper, level = 0.03):
 
 def psa(nper, ceil = 0.03, stable_per = 24):
     """
-    @summary: Variation of the Public Securities Association (PSA) prepayment model
-                for Mortgage Backed Securities.
-                https://en.wikipedia.org/wiki/PSA_prepayment_model
-    @param nper: int
-    @param ceil: float
-    @param stable_per: int
-    @return: prepayment rate list
+    Variation of the Public Securities Association (PSA) prepayment model
+    for Mortgage Backed Securities.
+    https://en.wikipedia.org/wiki/PSA_prepayment_model
+
+    :param sdate: datetime
+    :param nper: int
+    :param ceil: float
+    :param stable_per: int
+    :return: prepayment rate list
     """
 
     ans = [0.] * nper
@@ -41,6 +44,9 @@ def psa(nper, ceil = 0.03, stable_per = 24):
     for each_per in range(0, nper):
         if (step * each_per) <= ceil:
             ans[each_per] = step * each_per
-        else:
-            ans[each_per] = ans[each_per - 1]
+    else:
+        ans[each_per] = ans[each_per - 1]
     return np.round(ans, 6)
+
+
+

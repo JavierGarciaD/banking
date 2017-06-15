@@ -5,7 +5,6 @@
 :since: 10/06/2017
 :author: spectre
 """
-from Cython.Compiler.Errors import message
 import pytest
 
 from credit.cosecha2 import rolling_structure
