@@ -32,21 +32,18 @@ def psa(nper, ceil = 0.03, stable_per = 24):
     for Mortgage Backed Securities.
     https://en.wikipedia.org/wiki/PSA_prepayment_model
 
-    :param sdate: datetime
     :param nper: int
     :param ceil: float
     :param stable_per: int
-    :return: prepayment rate list
+    :return: prepayment numpy array
     """
 
-    ans = [0.] * nper
     step = ceil / stable_per
-    for each_per in range(0, nper):
-        if (step * each_per) <= ceil:
-            ans[each_per] = step * each_per
-    else:
-        ans[each_per] = ans[each_per - 1]
-    return np.round(ans, 6)
+    return np.round([step * each_per if step * each_per <= ceil else
+                     ceil for each_per in range(0, nper+1)], 6)
 
 
-
+if __name__ == '__main__':
+    from pprint import pprint
+    x = psa(nper = 24, ceil=0.03, stable_per=24)
+    pprint(x)
