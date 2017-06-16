@@ -13,26 +13,7 @@ from banking.interest_rates.conversion import componer_efectivas
 from banking.interest_rates.conversion import ea_a_nmv
 from banking.credit.prepago import psa
 
-def output_structure(sdate, nper, scores):
-    """
-    Construct the pandas dataframe output for a vintage
-    structure, given a list of scores
 
-    :param nper: int forecasting periods
-    :param sdate: datetime starting date
-    :param scores: list
-
-    :return: dataframe with score structure
-    """
-
-    col_names = ['saldo_inicial', 'desembolso', 'amortizacion', 'prepago',
-                 'castigo', 'saldo_final']
-
-    cols = [each_col + "_" + str(each_score) for each_col in col_names for
-            each_score in scores]
-    dates_index = pd.date_range(sdate, periods=nper, freq='M')
-
-    return pd.DataFrame(0.0, index=dates_index, columns=cols)
 
 
 def rolling_structure(d_matrix, nper, sdate):

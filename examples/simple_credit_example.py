@@ -10,18 +10,18 @@ def settings_cosecha():
     plazo = 12
     fecha_originacion = pd.to_datetime("2017-1-31")
     desembolso = 10000.0
-    max_forecast = plazo * 2
+    forecast = plazo * 2
 
     alturas_mora = [0, 30, 60, 90, 120, 150, 180, 210]
 
-    vector_tasas_indice = pd.Series(data = [0.0 * max_forecast],
+    tasas_indice = pd.Series(data = [0.0 * forecast],
                                     index = alturas_mora)
 
-    spread_originacion = interest_rates.models.fixed(nper = max_forecast,
+    spreads = interest_rates.models.fixed(nper = forecast,
                                                      fecha_inicial = fecha_originacion,
                                                      level = 0.22)
 
-    vector_prepago = credit.prepago.psa(nper = max_forecast,
+    prepago = credit.prepago.psa(nper = forecast,
                                         ceil=0.03,
                                         stable_per=12)
 
@@ -36,25 +36,26 @@ def settings_cosecha():
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.7],
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]  }
 
-    percent_prepago_por_calificacion = pd.Series(
+    per_prepago_cal = pd.Series(
             [1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], index=alturas_mora)
 
-    percent_recaudo_por_calificacion = pd.Series(
+    per_amor_calif = pd.Series(
             [1.0, 0.9, 0.7, 0.00, 0.0, 0.0, 0.0, 0.0], index=alturas_mora)
 
-    percent_castigo_por_calificacion = pd.Series(
+    per_cast_calif = pd.Series(
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], index=alturas_mora)
 
-    settings = dict(producto=producto, plazo=plazo, tipo_tasa=tipo_tasa,
-                    max_forecast=max_forecast, alturas_mora=alturas_mora,
-                    frecuencia_reprecio=frecuencia_reprecio,
-                    fecha_originacion=fecha_originacion, desembolso=desembolso,
-                    vector_tasas_indice=vector_tasas_indice,
-                    spread_originacion=spread_originacion, vector_prepago=vector_prepago,
-                    percent_prepago_por_calificacion=percent_prepago_por_calificacion,
+    settings = dict(name=producto, nper=plazo, rate_type=tipo_tasa,
+                    forecast=forecast, scores=alturas_mora,
+                    repricing=frecuencia_reprecio,
+                    sdate=fecha_originacion, notional=desembolso,
+                    tasas_indice=tasas_indice,
+                    spreads=spreads,
+                    prepago=prepago,
+                    per_prepago_cal=per_prepago_cal,
                     matrices_transicion=matrices_transicion,
-                    percent_recaudo_por_calificacion=percent_recaudo_por_calificacion,
-                    percent_castigo_por_calificacion=percent_castigo_por_calificacion)
+                    per_amor_calif=per_amor_calif,
+                    per_cast_calif=per_cast_calif)
 
     return settings
 
