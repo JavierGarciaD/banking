@@ -1,7 +1,7 @@
 import credit.prepago
 import interest_rates.models
 import pandas as pd
-
+import numpy as np
 
 def settings_cosecha():
     producto = 'credioficial'

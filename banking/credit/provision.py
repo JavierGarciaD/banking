@@ -58,7 +58,7 @@ class Provision():
         tomando el saldo final de la cosecha en cada periodo
         """
         saldos = self.cosecha.get_serie(serie_name="saldo_final",
-                                        por_calif=True)
+                                        per_score =True)
 
         for key, val in self.prov_calif.items():
             self.ans_df["saldo_final" + str(key)] = np.round(
@@ -80,7 +80,7 @@ class Provision():
         castigos pasan igual desde la cosecha
 
         """
-        castigos = self.cosecha.get_serie(serie_name="castigo", por_calif=True)
+        castigos = self.cosecha.get_serie(serie_name="castigo", per_score =True)
         for key in self.prov_calif:
             self.ans_df["castigo" + str(key)] = np.round(
                     castigos["castigo" + str(key)], self._rounding)
