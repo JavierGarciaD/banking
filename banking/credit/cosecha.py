@@ -307,6 +307,8 @@ class CreditVintage:
         cols_names = [self._cols[0] + '_' + str(each_score) for each_score in
                       self._rolling_m['scores']]
 
+        i_b = self.get_serie(serie_name = "saldo_inicial", per_score = True)
+
         return np.round(pd.Series([self.ans_df.loc[row, "saldo_inicial_0"],
                                    self.ans_df.loc[row, "saldo_inicial_30"],
                                    self.ans_df.loc[row, "saldo_inicial_60"],
@@ -382,6 +384,7 @@ if __name__ == '__main__':
     print("Fecha de Originacion: ", x1.sdate())
     print("Plazo de Originacion: ", x1.nper())
     print("Tasas: ", x1.rate_type())
-    print_tabulate(x1.get_balance(per_score = False))
-    #pprint(x1.get_serie(serie_name = 'saldo_final', per_score = False))
+    # print_tabulate(x1.get_balance(per_score = False))
+    print_tabulate(x1.get_serie(serie_name = 'saldo_inicial',
+                                per_score = True))
 
