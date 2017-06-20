@@ -16,7 +16,7 @@ def print_tabulate(data):
     print(tabulate(data,
                    headers = 'keys',
                    numalign = 'right',
-                   tablefmt = 'psql',
+                   tablefmt = 'simple',
                    floatfmt = ",.2f"))
 
 

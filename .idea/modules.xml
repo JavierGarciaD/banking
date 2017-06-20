@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/banking.iml" filepath="$PROJECT_DIR$/.idea/banking.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../docp/.idea/docp.iml" filepath="$PROJECT_DIR$/../docp/.idea/docp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../qstrader/.idea/qstrader.iml" filepath="$PROJECT_DIR$/../qstrader/.idea/qstrader.iml" />
     </modules>
   </component>
 </project>

@@ -3,6 +3,7 @@ import interest_rates.models
 import pandas as pd
 import numpy as np
 
+
 def settings_cosecha():
     producto = 'credioficial'
     tipo_tasa = 'FIJA'
@@ -11,19 +12,17 @@ def settings_cosecha():
     fecha_originacion = pd.to_datetime("2017-1-31")
     desembolso = 10000.0
     forecast = plazo * 2
-
     alturas_mora = [0, 30, 60, 90, 120, 150, 180, 210]
-
     tasas_indice = pd.Series(data = [0.0 * forecast],
-                                    index = alturas_mora)
+                             index = alturas_mora)
 
     spreads = interest_rates.models.fixed(nper = forecast,
-                                                     fecha_inicial = fecha_originacion,
-                                                     level = 0.22)
+                                          fecha_inicial = fecha_originacion,
+                                          level = 0.22)
 
     prepago = credit.prepago.psa(nper = forecast,
-                                        ceil=0.03,
-                                        stable_per=12)
+                                 ceil = 0.03,
+                                 stable_per = 12)
 
     matrices_transicion = {
         'scores': [0, 30, 60, 90, 120, 150, 180, 210],
@@ -34,7 +33,8 @@ def settings_cosecha():
             [0.1, 0.0, 0.0, 0.0, 0.1, 0.8, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.9, 0.0],
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.7],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]  }
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
+    }
 
     per_prepago_cal = pd.Series(
             [1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], index=alturas_mora)

@@ -8,7 +8,7 @@
 import pytest
 import numpy as np
 import pandas as pd
-from interest_rates.conversion import componer_efectivas
+from interest_rates.conversion import compound_effective_yr
 from interest_rates.conversion import ea_a_nmv
 
 
@@ -29,12 +29,12 @@ def vector_c():
 
 def test_componer_result():
     ans = [0.43, 0.68, 0.95]
-    np.testing.assert_allclose(componer_efectivas(vector_b(), vector_c()), ans)
+    np.testing.assert_allclose(compound_effective_yr(vector_b(), vector_c()), ans)
 
 
 def test_componer_diff_size():
     with pytest.raises(ValueError):
-        componer_efectivas(vector_a(), vector_b())
+        compound_effective_yr(vector_a(), vector_b())
 
 
 if __name__ == '__main__':

@@ -2,12 +2,18 @@ import numpy as np
 import pandas as pd
 from banking.common.presentation import print_tabulate
 from examples.simple_credit_example import settings_cosecha
-
+from interest_rates.conversion import ea_a_nmv
+from interest_rates.conversion import compound_effective_yr
 
 class CreditVintage:
+
+    #############################################################
+    # Private methods
+    #############################################################
+
     def __init__(self, settings):
         """
-        Construct an object with information for a loan portfolio on
+        :return an object with information for a loan portfolio on
         an homogeneous loan pool, where the loans share the same origination
         period.
         """
@@ -43,15 +49,14 @@ class CreditVintage:
 
         self.ans_df = self._df_structure()
         self.temp_struc = self._term_structure()
-        self.tasas_nmv = self._tasas_full_nmv()
+        self.tasas_nmv = self._nominal_rates()
 
         ##########################################################
         # initialize the balance
         ##########################################################
-        self._balance()
-        #self._rolling_structure
+        self._balance_constructor()
 
-    def _balance(self):
+    def _balance_constructor(self):
         """
         Construct a dataframe with projections of balances for
         a loan portfolio in an homogeneous loan pool, where the loans share
@@ -70,7 +75,7 @@ class CreditVintage:
             self._write_off_update_row(row)
             self._pay_update_row(row)
             self._end_update_row(row)
-            self._apply_transition(row)
+            self._initial_update_row(row)
 
         return self.ans_df
 
@@ -86,14 +91,16 @@ class CreditVintage:
 
         return pd.DataFrame(data = 0.0, index = dates_index, columns = cols)
 
-    def _initial_update_row(self, row, end_bal_with_trans):
+    def _initial_update_row(self, row):
         """
-        Update initial balance given an end balance
+        Update initial balance given an end balance and a rolling matrix
         """
-        for each_score in self._rolling_m['scores']:
-            col = self._cols[0] + '_' + str(each_score)
-            ans = end_bal_with_trans.get_value(each_score)
-            self.ans_df.loc[row, col] = np.round(ans, self._dec)
+        end_bal_with_trans = self._apply_transition(row)
+        if row + 1 <= self.ans_df.index[-1]:
+            for each_score in self._rolling_m['scores']:
+                col = self._cols[0] + '_' + str(each_score)
+                ans = end_bal_with_trans.get_value(each_score)
+                self.ans_df.loc[row + 1, col] = np.round(ans, self._dec)
 
     def _end_update_row(self, row):
         """
@@ -120,12 +127,13 @@ class CreditVintage:
 
     def _prepay_update_row(self, row):
         """
-        Computes prepayment by age and score
+        Computes prepayment as initial balance times prepayment by score times
+        prepayment by age
         Update output df
         """
         prepay_per_age = self._prepay[self.ans_df.index.get_loc(row)]
         a = self._prepay_score * prepay_per_age
-        b = self._get_inicial_balance_row(row)
+        b = self._get_data_by_row(row, self._cols[0])  # initial balance
         c = a * b
         for each_score in self._rolling_m['scores']:
             col = self._cols[3] + '_' + str(each_score)
@@ -170,11 +178,12 @@ class CreditVintage:
 
     def _write_off_update_row(self, row):
         """
-        Computes the write off value for each score
+        Computes the write off value for each score as initial balance times
+        write off by score
         Update output df
         """
         a = self._write_off
-        b = self._get_inicial_balance_row(row)
+        b = self._get_data_by_row(row, self._cols[0])  # initial balance
         c = a * b
 
         for each_score in self._rolling_m['scores']:
@@ -182,89 +191,47 @@ class CreditVintage:
             ans = c.get_value(each_score)
             self.ans_df.loc[row, col] = np.round(ans, self._dec)
 
-    #############################################################
-    # Private methods
-    #############################################################
-
-    def _term_structure2(self):
-        """
-        Construct the score structure of a credit vintage, given
-        a rolling matrix
-        """
-        # dictionary structure
-        dates_as_keys = pd.date_range(self._sdate, periods = self._nper,
-                                      freq = 'M')
-        ans_dict = dict.fromkeys(dates_as_keys)
-
-        # setup of first month
-        ans0 = np.asmatrix(np.zeros((len(self._rolling_m['scores']), 1)))
-        ans0[(0, 0)] = 1.0
-
-        for key in sorted(ans_dict.keys()):
-            m_to_apply = self._get_rolling_m(key)
-            if key == sorted(ans_dict.keys())[0]:
-                ans_dict[key] = ans0
-            else:
-                ans_dict[key] = np.transpose(m_to_apply) * ans_dict[key - 1]
-        return ans_dict
-
     def _term_structure(self):
         """
-        construye un diccionario con la estructura temporal de la cartera por
-        calificacion aplicando la matriz de transicion para cada periodo
+        :return dictionary with term structure of a vintage given a rolling
+        matriz for each period.
         """
-        # crea un diccionario vacio con n keys desde la fecha de originacion
-        dates_index = pd.date_range(self._sdate, periods = self._forecast,
-                                    freq = 'M')
-        ans_dict = dict.fromkeys(dates_index)
+        ans_dict = dict.fromkeys(pd.date_range(self._sdate,
+                                               periods = self._forecast,
+                                               freq = 'M'))
 
-        for key in dates_index:
-            m = self._get_rolling_m(key)
-            if key == dates_index[0]:
-                # mes cero, desembolso
-                ans_dict[dates_index[0]] = pd.Series(
-                        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        index = self._scores)
-                # aplicar transicion y actualizar t+1
-                ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                                index = self._scores)
-                ans_dict[key + 1] = ans
-
+        for key in sorted(ans_dict.keys()):
+            if key == sorted(ans_dict.keys())[0]:
+                ans0 = pd.Series(0.0, index = self._scores)
+                ans0[0, 0] = 1.0
+                ans_dict[key] = ans0
             else:
-
-                ans = pd.Series(np.dot(np.transpose(m), ans_dict[key]),
-                                index = self._scores)
-                ans_dict[key + 1] = ans
-
-        # TODO: refactor para no repetir instrucciones
+                m = self._get_rolling_m(key)
+                ans = np.dot(np.transpose(m), ans_dict[key - 1])
+                ans_dict[key] = pd.Series(ans, index = self._scores)
         return ans_dict
 
-    def _tasas_full_nmv(self):
+    def _nominal_rates(self):
         """
-        Computa la tasa full nmv para cada periodo basado en las
-        caracteristicas
-        faciales del name
+        :return Pandas Series of nominal periodic rates
         """
-        # TODO: implementar diferentes indices
-        # TODO: implementar reprecio
         if self._rate_type == "FIJA":
-            return np.round(
-                    self._spreads.apply(lambda x: (1 + x) ** (1 / 12) - 1), 6)
-        elif self._rate_type == "DTF":
-            pass
-        elif self._rate_type == "IPC":
-            pass
+            return np.round(ea_a_nmv(self._spreads), self._dec)
+        elif self._rate_type == "DTF" or self._rate_type == "IPC":
+            ea = compound_effective_yr(variable_rate = self._index_vals,
+                                       spreads = self._spreads,
+                                       repricing = self._repricing)
+            return np.round(ea_a_nmv(ea), 6)
         elif self._rate_type == "IBR1":
             pass
 
     def _get_rolling_m(self, row):
         """
-        locate the right transition matrix for the period.
-        If not a correct matrix is found, look up for month = 1 else
-        will give keyerror
+        :return the transition matrix for the period. If a correct matrix is
+        not found, look up for month = 1 else keyerror
         """
         if row.month > 12:
-            raise KeyError('Month does not exist: ', row.month)
+            raise KeyError('Month {} does not exist: '.format(str(row.month)))
         elif row.month in self._rolling_m.keys():
             return self._rolling_m[row.month]
         else:
@@ -273,51 +240,23 @@ class CreditVintage:
     def _apply_transition(self, row):
         """
         Apply a transition matrix to a vector of balances for delinquency,
-        update end _balance of month 0 as
-        beginning _balance month 1
         """
+        m = self._get_rolling_m(row)
+        end_bal = self._get_data_by_row(row, self._cols[-1])
+        ans = np.dot(np.transpose(m), end_bal)
+        return pd.Series(ans, index = self._scores)
 
-        sf_trans = pd.Series(
-                np.dot(np.transpose(self._get_rolling_m(row)),
-                       self._get_end_balance_row(row)), index = self._scores)
-
-        if row + 1 <= self.ans_df.index[-1]:
-            self._initial_update_row(row + 1, sf_trans)
-
-    def _get_end_balance_row(self, row):
+    def _get_data_by_row(self, row, data):
         """
-        Obtiene una serie de saldos finales ordenados por calificacion
-
+        :return Pandas Serie with the balance for a data type by score,
+        for a given date (row)
         """
+        data_pos = self._cols.index(data)
+        cols = [self._cols[data_pos] + '_' + str(each_score) for each_score in
+                self._rolling_m['scores']]
+        ans = [self.ans_df.loc[row, each_col] for each_col in cols]
 
-        return np.round(pd.Series([self.ans_df.loc[row, "saldo_final_0"],
-                                   self.ans_df.loc[row, "saldo_final_30"],
-                                   self.ans_df.loc[row, "saldo_final_60"],
-                                   self.ans_df.loc[row, "saldo_final_90"],
-                                   self.ans_df.loc[row, "saldo_final_120"],
-                                   self.ans_df.loc[row, "saldo_final_150"],
-                                   self.ans_df.loc[row, "saldo_final_180"],
-                                   self.ans_df.loc[row, "saldo_final_210"]],
-                                  index = self._scores), self._dec)
-
-    def _get_inicial_balance_row(self, row):
-        """
-        Obtiene una serie de saldos iniciales ordenados por calificacion
-        """
-        cols_names = [self._cols[0] + '_' + str(each_score) for each_score in
-                      self._rolling_m['scores']]
-
-        i_b = self.get_serie(serie_name = "saldo_inicial", per_score = True)
-
-        return np.round(pd.Series([self.ans_df.loc[row, "saldo_inicial_0"],
-                                   self.ans_df.loc[row, "saldo_inicial_30"],
-                                   self.ans_df.loc[row, "saldo_inicial_60"],
-                                   self.ans_df.loc[row, "saldo_inicial_90"],
-                                   self.ans_df.loc[row, "saldo_inicial_120"],
-                                   self.ans_df.loc[row, "saldo_inicial_150"],
-                                   self.ans_df.loc[row, "saldo_inicial_180"],
-                                   self.ans_df.loc[row, "saldo_inicial_210"]],
-                                  index = self._scores), self._dec)
+        return pd.Series(ans, index = self._scores)
 
     #############################################################
     # Public methods
@@ -368,7 +307,7 @@ class CreditVintage:
         if per_score:
             return ans
         else:
-            return ans.sum(axis = 1)
+            return ans.sum(axis = 1).rename(serie_name)
 
     def get_index(self):
         """
@@ -384,7 +323,6 @@ if __name__ == '__main__':
     print("Fecha de Originacion: ", x1.sdate())
     print("Plazo de Originacion: ", x1.nper())
     print("Tasas: ", x1.rate_type())
-    # print_tabulate(x1.get_balance(per_score = False))
-    print_tabulate(x1.get_serie(serie_name = 'saldo_inicial',
-                                per_score = True))
+    print_tabulate(x1.get_balance(per_score = False))
+    #print(x1.get_serie(serie_name = 'saldo_inicial', per_score = False))
 
