@@ -4,10 +4,12 @@ Created on 9/06/2017
 @author: spectre
 """
 from os.path import expanduser
+import pandas as pd
 from tabulate import tabulate
 # https://pypi.python.org/pypi/tabulate
 
-def print_tabulate(data):
+
+def tabulate_print(data):
     """
     Print nicely the vintage results
     :param: vintage: credit vintage object
@@ -20,11 +22,9 @@ def print_tabulate(data):
                    floatfmt = ",.2f"))
 
 
-def save_to_xls(bol, name):
-    if bol == True:
-        writer = pd.ExcelWriter(expanduser('~') + '/git/banking/data/' + name + '.xlsx')
-        name.transpose().to_excel(writer)
-        writer.save()
-        print("SAVE TO XLS, DONE!")
-
-
+def save_to_xls(name):
+    writer = pd.ExcelWriter(expanduser('~') + '/PycharmProjects/banking/'
+                                              'data/' + name + '.xls')
+    name.transpose().to_excel(writer)
+    writer.save()
+    print("SAVE TO XLS, DONE!")

@@ -8,34 +8,40 @@
 import pytest
 import numpy as np
 import pandas as pd
+import datetime as dt
 from interest_rates.conversion import compound_effective_yr
 from interest_rates.conversion import ea_a_nmv
 
 
 @pytest.fixture()
-def vector_a():
-    return pd.Series([0.1, 0.2])
+def vector_fixed10():
+    sdate = pd.to_datetime("01-31-2017")
+    dates = pd.date_range(start = sdate, periods = 10, freq = 'M')
+    return pd.Series([0.02] * 10, index = dates)
 
 
 @pytest.fixture()
-def vector_b():
-    return pd.Series([0.3, 0.4, 0.5])
+def vector_fixed12():
+    sdate = pd.to_datetime("01-31-2017")
+    dates = pd.date_range(start = sdate, periods = 12, freq = 'M')
+    return pd.Series([0.05] * 12, index = dates)
 
 
 @pytest.fixture()
-def vector_c():
-    return pd.Series([0.1, 0.2, 0.3])
+def vector_variable12():
+    sdate = pd.to_datetime("01-31-2017")
+    dates = pd.date_range(start = sdate, periods = 12, freq = 'M')
+    data = np.round([(each_step / 100) + 0.1 for each_step in range(12)], 6)
+    return pd.Series(data = data, index = dates)
 
 
-def test_componer_result():
-    ans = [0.43, 0.68, 0.95]
-    np.testing.assert_allclose(compound_effective_yr(vector_b(), vector_c()), ans)
-
-
-def test_componer_diff_size():
+def test_componer_diff_size(a = vector_fixed10, b = vector_variable12):
     with pytest.raises(ValueError):
-        compound_effective_yr(vector_a(), vector_b())
+        compound_effective_yr(fixed_spreads = a,
+                              repriced_spread = b,
+                              repricing = 1)
 
 
 if __name__ == '__main__':
     pytest.main(['-s', '-v'])
+
