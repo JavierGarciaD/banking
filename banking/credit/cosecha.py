@@ -5,6 +5,7 @@ from examples.simple_credit_example import settings_cosecha
 from interest_rates.conversion import ea_a_nmv
 from interest_rates.conversion import compound_effective_yr
 
+
 class CreditVintage:
 
     #############################################################
@@ -152,7 +153,7 @@ class CreditVintage:
             # capital payment for each score
             if 0 < per <= self._nper:
                 ppay = np.abs(np.ppmt(i, per, self._nper, val, 0))
-                ppay = np.round(ppay * self._pay_calif[index], self._dec)
+                ppay = np.round(self._dec, ppay * self._pay_calif[index])
                 ans.set_value(index, ppay)
             # After the initial term of the credit any value that because
             # rolling goes to score 0 goes to amortization of capital

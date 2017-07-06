@@ -14,6 +14,7 @@ from interest_rates.conversion import ea_a_nmv
 
 sdate = pd.to_datetime("01-31-2017")
 
+
 @pytest.fixture()
 def vector_fixed10():
     dates = pd.date_range(start = sdate, periods = 10, freq = 'M')
@@ -33,11 +34,22 @@ def vector_variable12():
     return pd.Series(data = data, index = dates)
 
 
-def test_componer_diff_size(vector_fixed10, vector_variable12):
+def test_compound_diff_size(vector_fixed10, vector_variable12):
+    """
+    Check error raise if  datetimeindex are not the same
+    """
     with pytest.raises(ValueError):
         compound_effective_yr(fixed_spreads = vector_fixed10,
                               repriced_spread = vector_variable12,
                               repricing = 1)
+
+
+def test_compound_reprice():
+    """
+    
+    :return:
+    """
+    pass
 
 
 if __name__ == '__main__':
