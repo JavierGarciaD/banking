@@ -7,30 +7,66 @@ import credit.vintages as vintages
 from common.presentation import tabulate_print
 
 
-def contract_info(product_name):
+def get_contract_info(product_name):
+    """
+    Get contract info from forecast database
+    :return: dict with nper, rate_type, repricing for a given product
+    """
     # create tuple, for security reasons
     # https://docs.python.org/2/library/sqlite3.html
     p = (product_name,)
 
     # connect to database
-    conn = sqlite3.connect(definitions.bd_path())
-    cursor = conn.cursor()
+    conn = sqlite3.connect(definitions.db_path())
+    c = conn.cursor()
 
     # execute sql in db
-    sql_ans = cursor.execute("SELECT term, rate_type, repricing \
-                            FROM forecast_info WHERE \
-                            product_name = ?", p)
+    sql_sentence = "SELECT term, rate_type, repricing \
+                            FROM contract_info WHERE \
+                            product_name = ?"
+    sql_ans = c.execute(sql_sentence, p)
 
     # fetch results
     ans = sql_ans.fetchall()
 
     # close cursor and db connection
-    cursor.close()
+    c.close()
     conn.close()
 
     return dict(nper=ans[0][0],
                 rate_type = ans[0][1],
                 repricing = ans[0][2])
+
+
+def get_rolling_m(product_name):
+    # connect to database
+    conn = sqlite3.connect(definitions.db_path())
+    c = conn.cursor()
+
+    ans_dict = dict()
+    for each_month in range(12):
+
+
+        # execute sql in db
+        sql_sentence = "SELECT _0, _30, _60, _90, _120, _150, _180 FROM credit \
+        WHERE product_name = 'tarjeta de credito' and month = 1 \
+        and score_id = 0"
+
+        c.execute(sql_sentence)
+
+        rolling_m = [[0.], [0.]]
+        # update answer dictionary
+        ans_dict[each_month + 1] = rolling_m
+
+    # close cursor and db connection
+    c.close()
+    conn.close()
+
+    return ans_dict
+
+
+def get_forecast_info():
+    pass
 
 
 def vintage_settings():
@@ -88,7 +124,7 @@ def vintage_settings():
 
     # Gets information from forecast database about the contract:
     # nper, rate type, repricing frequency
-    contract = contract_info(producto)
+    contract = get_contract_info(producto)
 
     # join two dictionaries, requires python 3.5
     # https://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
@@ -109,11 +145,13 @@ def provision_por_calificacion():
 
 if __name__ == '__main__':
 
-    x1 = vintages.VintageForecast(vintage_settings())
-    print("Linea de negocio: ", x1.name())
-    print("Fecha de Originacion: ", x1.sdate())
-    print("Plazo de Originacion: ", x1.nper())
-    print("Tasas: ", x1.rate_type())
-    tabulate_print(x1.get_balance(per_score = False))
+    print(get_rolling_m('tarjeta de credito'))
+
+    #x1 = vintages.VintageForecast(vintage_settings())
+    #print("Linea de negocio: ", x1.name())
+    #print("Fecha de Originacion: ", x1.sdate())
+    #print("Plazo de Originacion: ", x1.nper())
+    #print("Tasas: ", x1.rate_type())
+    #tabulate_print(x1.get_balance(per_score = False))
     #print(x1.get_serie(serie_name = 'saldo_inicial', per_score = False))
 

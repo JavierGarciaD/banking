@@ -8,5 +8,5 @@ def root_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-def bd_path():
+def db_path():
     return os.path.join(root_dir(), "data", "forecast.sqlite")
