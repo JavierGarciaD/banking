@@ -1,18 +1,46 @@
 import credit.prepayment
 import rates.models
 import pandas as pd
+import definitions
+import sqlite3
 import credit.vintages as vintages
 from common.presentation import tabulate_print
 
 
+def contract_info(product_name):
+    # create tuple, for security reasons
+    # https://docs.python.org/2/library/sqlite3.html
+    p = (product_name,)
+
+    # connect to database
+    conn = sqlite3.connect(definitions.bd_path())
+    cursor = conn.cursor()
+
+    # execute sql in db
+    sql_ans = cursor.execute("SELECT term, rate_type, repricing \
+                            FROM forecast_info WHERE \
+                            product_name = ?", p)
+
+    # fetch results
+    ans = sql_ans.fetchall()
+
+    # close cursor and db connection
+    cursor.close()
+    conn.close()
+
+    return dict(nper=ans[0][0],
+                rate_type = ans[0][1],
+                repricing = ans[0][2])
+
+
 def vintage_settings():
-    producto = 'credioficial'
-    tipo_tasa = 'FIJA'
-    frecuencia_reprecio = 0
-    plazo = 12
+    producto = 'tarjeta de credito'
+    # tipo_tasa = 'FIJA'
+    # frecuencia_reprecio = 0
+    # plazo = 12
     fecha_originacion = pd.to_datetime("2017-1-31")
     desembolso = 10000.0
-    forecast = plazo * 2
+    forecast = 24
     alturas_mora = [0, 30, 60, 90, 120, 150, 180]
     tasas_indice = pd.Series(data = [0.0 * forecast],
                              index = alturas_mora)
@@ -46,11 +74,8 @@ def vintage_settings():
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], index=alturas_mora)
 
     settings = dict(name=producto,
-                    nper=plazo,
-                    rate_type=tipo_tasa,
                     forecast=forecast,
                     scores=alturas_mora,
-                    repricing=frecuencia_reprecio,
                     sdate=fecha_originacion,
                     notional=desembolso,
                     tasas_indice=tasas_indice,
@@ -60,7 +85,15 @@ def vintage_settings():
                     matrices_transicion=matrices_transicion,
                     per_amor_calif=per_amor_calif,
                     per_cast_calif=per_cast_calif)
-    return settings
+
+    # Gets information from forecast database about the contract:
+    # nper, rate type, repricing frequency
+    contract = contract_info(producto)
+
+    # join two dictionaries, requires python 3.5
+    # https://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
+    # https://www.python.org/dev/peps/pep-0448/
+    return {**settings, **contract}
 
 
 def provision_por_calificacion():
