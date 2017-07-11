@@ -9,8 +9,8 @@ import pytest
 import numpy as np
 import pandas as pd
 import datetime as dt
-from interest_rates.conversion import compound_effective_yr
-from interest_rates.conversion import ea_a_nmv
+from rates.conversion import compound_effective_yr
+from rates.conversion import ea_a_nmv
 
 sdate = pd.to_datetime("01-31-2017")
 

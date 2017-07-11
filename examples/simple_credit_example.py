@@ -1,5 +1,5 @@
-import credit.prepago
-import interest_rates.models
+import credit.prepayment
+import rates.models
 import pandas as pd
 import numpy as np
 
@@ -16,13 +16,13 @@ def settings_cosecha():
     tasas_indice = pd.Series(data = [0.0 * forecast],
                              index = alturas_mora)
 
-    spreads = interest_rates.models.fixed(nper = forecast,
-                                          fecha_inicial = fecha_originacion,
-                                          level = 0.22)
+    spreads = rates.models.fixed(nper = forecast,
+                                 fecha_inicial = fecha_originacion,
+                                 level = 0.22)
 
-    prepago = credit.prepago.psa(nper = forecast,
-                                 ceil = 0.03,
-                                 stable_per = 12)
+    prepago = credit.prepayment.psa(nper = forecast,
+                                    ceil = 0.03,
+                                    stable_per = 12)
 
     matrices_transicion = {
         'scores': [0, 30, 60, 90, 120, 150, 180, 210],

@@ -6,7 +6,7 @@
 :author: spectre
 """
 import pytest
-from interest_rates.conversion import *
+from rates.conversion import *
 import numpy as np
 import pandas as pd
 
