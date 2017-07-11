@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
-from banking.common.presentation import tabulate_print
-from examples.simple_credit_example import settings_cosecha
+
 from rates.conversion import ea_a_nmv
 from rates.conversion import compound_effective_yr
 
 
-class CreditVintage:
+class VintageForecast:
 
     #############################################################
     # Private methods
@@ -18,18 +17,19 @@ class CreditVintage:
         an homogeneous loan pool, where the loans share the same origination
         period.
         """
-        self._dec = 2
+        self._dec2 = 2
+        self._dec6 = 6
         self._forecast = settings['forecast']
 
         self._name = settings['name']
         self._nper = settings['nper']
         self._sdate = pd.to_datetime(settings['sdate'])
-        self._notional = np.round(settings['notional'], self._dec)
+        self._notional = np.round(settings['notional'], self._dec2)
 
         self._repricing = settings['repricing']
         self._rate_type = settings['rate_type']
-        self._index_vals = np.round(settings['tasas_indice'], 6)
-        self._spreads = np.round(settings['spreads'], 6)
+        self._index_vals = np.round(settings['tasas_indice'], self._dec6)
+        self._spreads = np.round(settings['spreads'], self._dec6)
 
         self._prepay = settings['prepago']
         self._prepay_score = settings['per_prepago_cal']
@@ -43,11 +43,13 @@ class CreditVintage:
         # building  structures
         ##########################################################
 
-        # cols orders must be preserved
-        self._cols = ['saldo_inicial', 'desembolso', 'amortizacion', 'prepago',
-                      'castigo', 'saldo_final']
+        # cols orders must be preserved: initial balance, origination,
+        # contractual payment, prepayment, write off, ending balance
+        self._cols = ['inicial_bal', 'origination', 'payment', 'prepayment',
+                      'write_off', 'end_bal']
 
         self.ans_df = self._df_structure()
+        # TODO "check if a term structure is necessary or can be embedded
         self.temp_struc = self._term_structure()
         self.tasas_nmv = self._nominal_rates()
 
@@ -99,7 +101,7 @@ class CreditVintage:
             for each_score in self._scores:
                 col = self._cols[0] + '_' + str(each_score)
                 ans = end_bal_with_trans.get_value(each_score)
-                self.ans_df.loc[row + 1, col] = np.round(ans, self._dec)
+                self.ans_df.loc[row + 1, col] = np.round(ans, self._dec2)
 
     def _end_update_row(self, row):
         """
@@ -122,7 +124,7 @@ class CreditVintage:
                    - self.ans_df.loc[row, pay]
                    - self.ans_df.loc[row, pre]
                    - self.ans_df.loc[row, w_o])
-            self.ans_df.loc[row, e_b] = np.round(ans, self._dec)
+            self.ans_df.loc[row, e_b] = np.round(ans, self._dec2)
 
     def _prepay_update_row(self, row):
         """
@@ -137,7 +139,7 @@ class CreditVintage:
         for each_score in self._scores:
             col = self._cols[3] + '_' + str(each_score)
             ans = c.get_value(each_score)
-            self.ans_df.loc[row, col] = np.round(ans, self._dec)
+            self.ans_df.loc[row, col] = np.round(ans, self._dec2)
 
     def _pay_update_row(self, row):
         """
@@ -153,7 +155,7 @@ class CreditVintage:
             # capital payment for each score
             if 0 < per <= self._nper:
                 ppay = np.abs(np.ppmt(i, per, self._nper, val, 0))
-                ppay = np.round(self._dec, ppay * self._pay_calif[index])
+                ppay = np.round(ppay * self._pay_calif[index], self._dec2)
                 ans.set_value(index, ppay)
             # After the initial term of the credit any value that because
             # rolling goes to score 0 goes to amortization of capital
@@ -173,7 +175,7 @@ class CreditVintage:
                            - self.ans_df.loc[row, w_o]),
                           ans.get(each_score))
 
-            self.ans_df.loc[row, pay] = np.round(net_pay, self._dec)
+            self.ans_df.loc[row, pay] = np.round(net_pay, self._dec2)
 
     def _write_off_update_row(self, row):
         """
@@ -188,7 +190,7 @@ class CreditVintage:
         for each_score in self._scores:
             col = self._cols[4] + '_' + str(each_score)
             ans = c.get_value(each_score)
-            self.ans_df.loc[row, col] = np.round(ans, self._dec)
+            self.ans_df.loc[row, col] = np.round(ans, self._dec2)
 
     def _term_structure(self):
         """
@@ -216,15 +218,16 @@ class CreditVintage:
         frequency
         """
         if self._rate_type == "FIJA":
-            return np.round(ea_a_nmv(vector_a = self._spreads), self._dec)
+            return np.round(ea_a_nmv(vector_a = self._spreads), self._dec6)
 
         elif self._rate_type == "DTF" or self._rate_type == "IPC":
             ea = compound_effective_yr(repriced_spread = self._index_vals,
                                        fixed_spreads = self._spreads,
                                        repricing = self._repricing)
-            return np.round(ea_a_nmv(vector_a = ea), 6)
+            return np.round(ea_a_nmv(vector_a = ea), self._dec6)
 
         elif self._rate_type == "IBR":
+            # TODO implement IBR calculations
             raise NotImplementedError
 
     def _get_rolling_m(self, row):
@@ -316,15 +319,3 @@ class CreditVintage:
         Retorna el indice de fechas de la cosecha
         """
         return self.ans_df.index
-
-
-if __name__ == '__main__':
-    from pprint import pprint
-    x1 = CreditVintage(settings_cosecha())
-    print("Linea de negocio: ", x1.name())
-    print("Fecha de Originacion: ", x1.sdate())
-    print("Plazo de Originacion: ", x1.nper())
-    print("Tasas: ", x1.rate_type())
-    tabulate_print(x1.get_balance(per_score = False))
-    #print(x1.get_serie(serie_name = 'saldo_inicial', per_score = False))
-
