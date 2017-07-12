@@ -3,6 +3,7 @@ import rates.models
 import pandas as pd
 import definitions
 import sqlite3
+import sqlalchemy
 import credit.vintages as vintages
 from common.presentation import tabulate_print
 
@@ -17,7 +18,10 @@ def get_contract_info(product_name):
     p = (product_name,)
 
     # connect to database
-    conn = sqlite3.connect(definitions.db_path())
+    engine = sqlalchemy.create_engine(definitions.db_path())
+    conn = engine.connect()
+    meta = sqlalchemy.MetaData(engine, reflect = True)
+    table = meta.tables['contract_info']
     c = conn.cursor()
 
     # execute sql in db
