@@ -2,6 +2,7 @@
 from common.db_manager import forecast_db
 from sqlalchemy import select
 from sqlalchemy import and_
+from sqlalchemy import asc
 
 
 def get_contract_info(product_name):
@@ -33,7 +34,28 @@ def get_contract_info(product_name):
                 rate_spread = row[4])
 
 
-def get_rolling(product_name, m):
+def get_scores():
+    """
+
+    :return: list with available scores
+    """
+    db = forecast_db()
+    conn = db[0]
+    meta = db[1]
+    table = meta.tables['scores']
+
+    sql = select([table.c.score]).order_by(asc('score'))
+    ans = conn.execute(sql)
+
+    ret = []
+    for row in ans:
+        ret.append(int(row[0]))
+
+    conn.close()
+    return ret
+
+
+def get_rolling(product_name):
     """
     Get the rolling matrix for a specific product and month
     :param product_name:
@@ -43,41 +65,39 @@ def get_rolling(product_name, m):
     db = forecast_db()
     conn = db[0]
     meta = db[1]
+
     table = meta.tables['rolling']
 
-    # Construct select sql statement
-    sql = select([table.c.rolling0,
-                  table.c.rolling30,
-                  table.c.rolling60,
-                  table.c.rolling90,
-                  table.c.rolling120,
-                  table.c.rolling150,
-                  table.c.rolling180]).where(
-            and_(table.c.product_name == product_name,
-                 table.c.month == m))
+    scores = get_scores()
+    ans_dict = dict()
+    for each_month in range(12):
+        ret = []
+        for each_score in scores:
+            # roll for product x score x month
+            sql = select([table.c.roll]).where(
+                    and_(table.c.product_name == product_name,
+                         table.c.month == each_month + 1,
+                         table.c.score == each_score))
 
-    print(sql)
-    # Execute and fetch result
-    ans = conn.execute(sql).fetchall()[0]
+            # Execute and fetch result
+            ans = conn.execute(sql).fetchall()[0]
 
-    # Close the connection
+            # Parse and create list of list
+            for row in ans:
+                parsed_list = row.split(",")
+                dbl_list = [float(x) for x in parsed_list]
+                ret.append(dbl_list)
+
+        ans_dict[each_month + 1] = ret
+
     conn.close()
 
-    # Parse and create list of list
-    ret = []
-    for row in ans:
-        parsed_list = row.split(",")
-        dbl_list = [float(x) for x in parsed_list]
-        ret.append(dbl_list)
-
-    return ret
-
-
-def rolling_dict(product_name):
-    pass
+    return ans_dict
 
 
 if __name__ == '__main__':
-    from pprint import pprint
-    x = get_rolling('tarjeta de credito', 1)
-    pprint(x)
+
+
+    x = get_rolling('tarjeta de credito')
+    print(x)
+
