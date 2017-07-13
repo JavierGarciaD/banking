@@ -4,33 +4,51 @@ from sqlalchemy import select
 import definitions
 
 
-def get_contract_info(product_name):
+def forecast_db():
     """
-    Get contract info from forecast database
-    :return: dict with nper, rate_type, repricing for a given product
+    Standard conection to forecast database
+    :return: connection, metadata
     """
     # Create engine
     db_path = r"sqlite:///" + definitions.db_path()
     engine = create_engine(db_path, echo = False)
 
-    # Create connection
+    # get connection and metadata
     conn = engine.connect()
-
     meta = MetaData(engine, reflect = True)
-    table = meta.tables['contract_info']
 
-    # Select
-    select_st = select([table]).where(
-            table.c.product_name == product_name)
+    return {'conn': conn, 'metadata': meta}
 
-    ans = conn.execute(select_st).fetchall()
+
+def get_contract_info(product_name):
+    """
+    Get contract info from forecast database
+    :return: dict with nper, rate_type, repricing for a given product
+    """
+    db = forecast_db()
+    conn = db['conn']
+    meta = db['metadata']
+    contract_info = meta.tables['contract_info']
+
+    # Construct select sql statement
+    sql_query = select([contract_info]).where(
+            contract_info.c.product_name == product_name)
+
+    # execute and fetch result
+    ans = conn.execute(sql_query)
+    row = ans.fetchone()
 
     # Close the connection
+    ans.close()
     conn.close()
 
-    return dict(nper = ans[0][1],
-                rate_type = ans[0][2],
-                repricing = ans[0][3])
+    # Construct dictionary
+    return dict(nper = row[1],
+                rate_type = row[2],
+                repricing = row[3])
+
+
+
 
 
 if __name__ == '__main__':

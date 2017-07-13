@@ -5,7 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/banking" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.5.3 (C:\Users\javgar119\Anaconda3\python.exe)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.6.1 (C:\Users\spectre\Anaconda3\python.exe)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="docp" />
     <orderEntry type="module" module-name="qstrader" />
