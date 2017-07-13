@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import select
 import definitions
+from sys import getsizeof
 
 
 def forecast_db():
@@ -17,7 +18,7 @@ def forecast_db():
     conn = engine.connect()
     meta = MetaData(engine, reflect = True)
 
-    return {'conn': conn, 'metadata': meta}
+    return conn, meta
 
 
 def get_contract_info(product_name):
@@ -26,8 +27,8 @@ def get_contract_info(product_name):
     :return: dict with nper, rate_type, repricing for a given product
     """
     db = forecast_db()
-    conn = db['conn']
-    meta = db['metadata']
+    conn = db[0]
+    meta = db[1]
     contract_info = meta.tables['contract_info']
 
     # Construct select sql statement
@@ -46,9 +47,6 @@ def get_contract_info(product_name):
     return dict(nper = row[1],
                 rate_type = row[2],
                 repricing = row[3])
-
-
-
 
 
 if __name__ == '__main__':

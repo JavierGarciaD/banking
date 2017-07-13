@@ -3,7 +3,7 @@ import rates.models
 import pandas as pd
 import definitions
 import sqlite3
-import sqlalchemy
+from common.db_manager import *
 import credit.vintages as vintages
 from common.presentation import tabulate_print
 
