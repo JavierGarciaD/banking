@@ -9,7 +9,8 @@ from sqlalchemy import asc
 def get_contract_info(product_name):
     """
     Get contract info from forecast database
-    :return: dict with nper, rate_type, repricing for a given product
+    :return: dict with nper, rate_type, repricing_ rate_spread. And per score
+    provision, payment probability, prepayment probability, writeoff prob.
     """
     db = DB('forecast')
     ########################################
@@ -111,11 +112,33 @@ def get_rolling(product_name):
     return ans_dict
 
 
+def get_budget(product_name, sdate):
+    """
+    Budget for a product, limited to data available at the database
+    :param product_name:
+    :param sdate: starting date
+    :return: pandas series
+    """
+    db = DB('forecast')
+    table = db.table('budget')
+
+    sql = select([table]).where(table.c.product_name == product_name)
+    ans = list(db.query(sql).fetchone())
+    del ans[0]
+
+    date_index = pd.date_range(start = sdate, periods = len(ans), freq='M')
+
+    return pd.Series(data = [float(x) for x in ans], index = date_index)
+
+
+
 if __name__ == '__main__':
-    from pprint import pprint
-    scr = get_contract_info('tarjeta de credito')
-    pprint(scr)
+    #from pprint import pprint
+    #scr = get_contract_info('tarjeta de credito')
+    #pprint(scr)
     # score = get_scores()
     # print(score)
     # x = get_rolling('tarjeta de credito')
     # print(x)
+    bdg = get_budget('tarjeta de credito', '31-01-2017')
+    print(bdg)

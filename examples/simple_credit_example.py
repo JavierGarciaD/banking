@@ -5,6 +5,7 @@ import credit.vintages as vintages
 from credit.forecast import get_contract_info
 from credit.forecast import get_scores
 from credit.forecast import get_rolling
+from credit.forecast import get_budget
 from common.presentation import tabulate_print
 
 
@@ -57,8 +58,11 @@ if __name__ == '__main__':
 
     prod = 'tarjeta de credito'
     my_date = '01-31-2017'
-    disb = 10000.0
-    fore = 60
+
+    budget = get_budget(prod, my_date)
+
+    month_disburtment = budget[0]
+    fore = len(budget)
 
     prep_array = PrepaymentModel.psa(nper = fore,
                                      ceil = 0.03,
@@ -69,7 +73,7 @@ if __name__ == '__main__':
 
     x1 = vintages.VintageForecast(vintage_settings(product_name = prod,
                                                    sdate = my_date,
-                                                   disburment = disb,
+                                                   disburment = month_disburtment,
                                                    fore_length = fore,
                                                    prepay_array = prep_array,
                                                    index_array = index_array))
