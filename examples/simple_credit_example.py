@@ -8,7 +8,8 @@ from credit.forecast import get_rolling
 from common.presentation import tabulate_print
 
 
-def vintage_settings(product_name, sdate, disburment, fore_length,
+def vintage_settings(product_name, sdate,
+                     disburment, fore_length,
                      prepay_array, index_array):
 
     # Gets information from forecast database about the contract_info:
@@ -17,48 +18,39 @@ def vintage_settings(product_name, sdate, disburment, fore_length,
 
     # spread over index is fixed
     spreads_array = InterestRateModel.fixed(nper = fore_length,
-                                            fecha_inicial = sdate,
+                                            sdate = sdate,
                                             level = contract_info[
                                                 'rate_spread'])
 
-    per_prepago_cal = pd.Series(
-            [1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0], index=get_scores())
-
-    per_amor_calif = pd.Series(
-            [1.0, 0.9, 0.7, 0.00, 0.0, 0.0, 0.0], index=get_scores())
-
-    per_cast_calif = pd.Series(
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], index=get_scores())
-
-    settings = dict(name=product_name,
+    settings = dict(name = product_name,
                     nper = contract_info['nper'],
                     rate_type = contract_info['rate_type'],
                     repricing = contract_info['repricing'],
-                    forecast=int(fore_length),
-                    scores=get_scores(),
-                    sdate=pd.to_datetime(sdate),
-                    notional=float(disburment),
-                    index_rates_array=index_array,
+                    forecast = int(fore_length),
+                    scores = get_scores(),
+                    sdate = pd.to_datetime(sdate),
+                    notional = float(disburment),
+                    index_rates_array = index_array,
                     rate_spreads_array=spreads_array,
                     prepay_array=prepay_array,
-                    per_prepago_cal=per_prepago_cal,
+                    prepay_per_score=contract_info['prepay_per_score'],
                     rolling_m=get_rolling(product_name),
-                    per_amor_calif=per_amor_calif,
-                    per_cast_calif=per_cast_calif
+                    pay_per_score=contract_info['pay_per_score'],
+                    writeoff_per_score=contract_info['writeoff_per_score']
                     )
 
     return settings
 
 
-def provision_por_calificacion():
-    return {0: 0.10,
-            30: 0.15,
-            60: 0.25,
-            90: 0.40,
-            120: 0.60,
-            150: 0.80,
-            180: 1.00
-    }
+# def provision_por_calificacion():
+#     return {0: 0.10,
+#             30: 0.15,
+#             60: 0.25,
+#             90: 0.40,
+#             120: 0.60,
+#             150: 0.80,
+#             180: 1.00
+#     }
 
 
 if __name__ == '__main__':

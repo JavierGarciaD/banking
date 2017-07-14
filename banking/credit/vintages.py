@@ -32,12 +32,12 @@ class VintageForecast:
         self._spreads = np.round(settings['rate_spreads_array'], self._dec6)
 
         self._prepay = settings['prepay_array']
-        self._prepay_score = settings['per_prepago_cal']
+        self._prepay_score = settings['prepay_per_score']
 
         self._rolling_m = settings['rolling_m']
         self._scores = settings['scores']
-        self._pay_calif = settings['per_amor_calif']
-        self._write_off = settings['per_cast_calif']
+        self._pay_calif = settings['pay_per_score']
+        self._write_off = settings['writeoff_per_score']
 
         ##########################################################
         # building  structures

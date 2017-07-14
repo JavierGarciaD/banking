@@ -9,11 +9,11 @@ import pandas as pd
 
 class InterestRateModel:
     @staticmethod
-    def fixed(nper, fecha_inicial, level):
+    def fixed(nper, sdate, level):
         """
 
         """
-        dates_index = pd.date_range(fecha_inicial, periods = nper, freq = 'M')
+        dates_index = pd.date_range(sdate, periods = nper, freq = 'M')
         return pd.Series([level] * nper, index = dates_index)
 
     @staticmethod
@@ -32,6 +32,6 @@ class InterestRateModel:
         return NotImplementedError
 
     @staticmethod
-    def linear_g():
+    def linear_g(step, start_level, end):
         # TODO: linear growth
         return NotImplementedError
