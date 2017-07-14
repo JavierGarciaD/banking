@@ -1,30 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
-from definitions import db_path
 from sqlalchemy.exc import SQLAlchemyError
-
-
-def forecast_db():
-    """
-    Conection to forecast database
-    :return: connection, metadata
-    """
-    # Create engine
-    db = r"sqlite:///" + db_path()
-    engine = create_engine(db, echo = False)
-
-    # get connection and metadata
-    conn = engine.connect()
-    meta = MetaData(engine, reflect = True)
-
-    return conn, meta
+from definitions import db_path
 
 
 class DB:
-
-    # TODO https://stackoverflow.com/a/19440352/3512107
-    # TODO Manage connections to database
-
+    """
+    Database object that manage interactions with database
+    Varian of: https://stackoverflow.com/a/19440352/3512107
+    """
     def __init__(self):
         self.conn = None
         self.meta = None
@@ -49,6 +33,9 @@ class DB:
             ans = self.conn.execute(sql)
         return ans
 
+    def table(self, name):
+        return self.metadata().tables[name]
+
     def metadata(self):
         try:
             meta = MetaData(self.engine, reflect = True)
@@ -63,9 +50,5 @@ if __name__ == '__main__':
     db = DB()
 
     sql = "SELECT score FROM scores"
-    cur = db.query(sql)
-    meta = db.metadata
-    for x in cur:
-        print(x)
-
-    print(meta)
+    #cur = db.query(sql)
+    print(db.table('scores'))

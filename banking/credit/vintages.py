@@ -35,7 +35,7 @@ class VintageForecast:
         self._prepay_score = settings['per_prepago_cal']
 
         self._rolling_m = settings['matrices_transicion']
-        self._scores = settings['matrices_transicion']['scores']
+        self._scores = settings['scores']
         self._pay_calif = settings['per_amor_calif']
         self._write_off = settings['per_cast_calif']
 
