@@ -9,13 +9,14 @@ class DB:
     Database object that manage interactions with database
     Varian of: https://stackoverflow.com/a/19440352/3512107
     """
-    def __init__(self):
+    def __init__(self, db_name):
         self.conn = None
         self.meta = None
         self.engine = None
+        self.db_name = db_name
 
     def db_engine(self):
-        db = r"sqlite:///" + db_path()
+        db = r"sqlite:///" + db_path(self.db_name)
         self.engine = create_engine(db, echo = False)
 
     def connect(self):
@@ -47,7 +48,7 @@ class DB:
 
 if __name__ == '__main__':
 
-    db = DB()
+    db = DB('forecast')
 
     sql = "SELECT score FROM scores"
     #cur = db.query(sql)

@@ -28,13 +28,13 @@ class VintageForecast:
 
         self._repricing = settings['repricing']
         self._rate_type = settings['rate_type']
-        self._index_vals = np.round(settings['tasas_indice'], self._dec6)
-        self._spreads = np.round(settings['spreads'], self._dec6)
+        self._index_vals = np.round(settings['index_rates_array'], self._dec6)
+        self._spreads = np.round(settings['rate_spreads_array'], self._dec6)
 
-        self._prepay = settings['prepago']
+        self._prepay = settings['prepay_array']
         self._prepay_score = settings['per_prepago_cal']
 
-        self._rolling_m = settings['matrices_transicion']
+        self._rolling_m = settings['rolling_m']
         self._scores = settings['scores']
         self._pay_calif = settings['per_amor_calif']
         self._write_off = settings['per_cast_calif']
@@ -109,7 +109,7 @@ class VintageForecast:
         End Balance = Initial balance + Disbursement - Contractual payment -
         Prepayment - WriteOff
         """
-        # ['saldo_inicial', 'desembolso', 'amortizacion', 'prepago',
+        # ['saldo_inicial', 'desembolso', 'amortizacion', 'prepay_array',
         #              'castigo', 'saldo_final']
         for each_score in self._scores:
             i_b = self._cols[0] + '_' + str(each_score)

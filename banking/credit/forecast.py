@@ -10,7 +10,7 @@ def get_contract_info(product_name):
     Get contract info from forecast database
     :return: dict with nper, rate_type, repricing for a given product
     """
-    db = DB()
+    db = DB('forecast')
     table = db.table('contract_info')
 
     # Construct select sql statement
@@ -35,7 +35,7 @@ def get_scores():
 
     :return: list with available scores
     """
-    db = DB()
+    db = DB('forecast')
     table = db.table('scores')
 
     sql = select([table.c.score]).order_by(asc('score'))
@@ -54,7 +54,7 @@ def get_rolling(product_name):
     :param product_name:
     :return: dict with rolling matrix for each month
     """
-    db = DB()
+    db = DB('forecast')
     table = db.table('rolling')
     scores = get_scores()
 
@@ -82,12 +82,27 @@ def get_rolling(product_name):
     return ans_dict
 
 
+def get_prepay_per_score():
+    # TODO: get_prepay_per_score
+    return NotImplementedError
+
+
+def get_writeoff_per_score():
+    # TODO: get_writeoff_per_score
+    return NotImplementedError
+
+
+def get_pay_per_score():
+    # TODO: get_pay_per_score
+    return NotImplementedError
+
+
 if __name__ == '__main__':
 
-    #scr = get_contract_info('tarjeta de credito')
-    #print(scr)
-    # score = get_scores()
-    # print(score)
+    scr = get_contract_info('tarjeta de credito')
+    print(scr)
+    score = get_scores()
+    print(score)
     x = get_rolling('tarjeta de credito')
     print(x)
 

@@ -113,7 +113,7 @@ class Provision():
 
         else:
             ans = pd.DataFrame(columns=(
-                'saldo_inicial', 'desembolso', 'amortizacion', 'prepago',
+                'saldo_inicial', 'desembolso', 'amortizacion', 'prepay_array',
                 'castigo', 'saldo_final'), index=self.ans_df.index)
             for col in ans:
                 ans[col] = self.get_serie(serie_name=col, por_calif=False)
