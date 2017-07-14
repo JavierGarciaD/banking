@@ -57,31 +57,32 @@ def vintage_settings(product_name, sdate,
 if __name__ == '__main__':
 
     prod = 'tarjeta de credito'
-    my_date = '01-31-2017'
+    initial_date = '01-31-2017'
 
-    budget = get_budget(prod, my_date)
-
-    month_disburtment = budget[0]
+    budget = get_budget(product_name = prod, sdate = initial_date)
+    print(budget)
     fore = len(budget)
 
     prep_array = PrepaymentModel.psa(nper = fore,
                                      ceil = 0.03,
                                      stable_period = 12)
 
-    index_array = InterestRateModel.zero(nper = fore,
-                                         fecha_inicial = my_date)
+    for sdate, m_disbur in budget.iteritems():
 
-    x1 = vintages.VintageForecast(vintage_settings(product_name = prod,
-                                                   sdate = my_date,
-                                                   disburment = month_disburtment,
-                                                   fore_length = fore,
-                                                   prepay_array = prep_array,
-                                                   index_array = index_array))
+        index_array = InterestRateModel.zero(nper = fore,
+                                             fecha_inicial = sdate)
 
-    print("Linea de negocio: ", x1.name())
-    print("Fecha de Originacion: ", x1.sdate())
-    print("Plazo de Originacion: ", x1.nper())
-    print("Tasas: ", x1.rate_type())
-    tabulate_print(x1.get_balance(per_score = False))
-    #print(x1.get_serie(serie_name = 'saldo_inicial', per_score = False))
+        x1 = vintages.VintageForecast(vintage_settings(product_name = prod,
+                                                       sdate = sdate,
+                                                       disburment = m_disbur,
+                                                       fore_length = fore,
+                                                       prepay_array = prep_array,
+                                                       index_array = index_array))
+
+        print("Linea de negocio: ", x1.name())
+        print("Fecha de Originacion: ", x1.sdate())
+        print("Plazo de Originacion: ", x1.nper())
+        print("Tasas: ", x1.rate_type())
+        tabulate_print(x1.get_balance(per_score = False))
+        #print(x1.get_serie(serie_name = 'saldo_inicial', per_score = False))
 

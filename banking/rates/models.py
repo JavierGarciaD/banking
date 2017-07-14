@@ -1,8 +1,6 @@
 """
-Created on 11/10/2016
-
-:author:
-:description: Interest rates models
+:author: Javier Garcia
+:description: Some interest rates models to choose from
 """
 import pandas as pd
 
