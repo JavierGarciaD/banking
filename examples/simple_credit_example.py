@@ -1,9 +1,9 @@
+import pandas as pd
 from credit.prepayment import PrepaymentModel
 from rates.models import InterestRateModel
-import pandas as pd
-import credit.vintages as vintages
 from credit.forecast import vintage_settings
 from credit.forecast import get_budget
+from credit.vintages import VintageForecast
 from common.presentation import tabulate_print
 
 
@@ -11,7 +11,6 @@ if __name__ == '__main__':
 
     prod = 'tarjeta de credito'
     initial_date = '01-31-2017'
-
     budget = get_budget(product_name = prod, sdate = initial_date)
     fore = len(budget)
 
@@ -33,16 +32,11 @@ if __name__ == '__main__':
                                     index_array =
                                     index_array)
 
-        my_vintage = vintages.VintageForecast(settings = settings)
+        my_vintage = VintageForecast(settings = settings)
+
         print(sdate, ' - OK')
 
         ans = ans.add(my_vintage.get_balance(per_score = True),
                       fill_value = 0.0)
-        #print("Linea de negocio: ", x1.name())
-        #print("Fecha de Originacion: ", x1.sdate())
-        #print("Plazo de Originacion: ", x1.nper())
-        #print("Tasas: ", x1.rate_type())
-        #tabulate_print(x1.
-        #print(x1.get_serie(serie_name = 'saldo_inicial', per_score = False))
-    print(ans)
+    tabulate_print(ans)
 

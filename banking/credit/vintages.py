@@ -320,6 +320,7 @@ class VintageForecast:
         """
         return self.ans_df.index
 
-    def add(self):
-        # TODO: add two vintages
-        return NotImplementedError
+
+def vintages_sum(v1, v2):
+    # TODO: add two vintages
+    return NotImplementedError
