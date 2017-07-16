@@ -319,3 +319,7 @@ class VintageForecast:
         Retorna el indice de fechas de la cosecha
         """
         return self.ans_df.index
+
+    def add(self):
+        # TODO: add two vintages
+        return NotImplementedError
