@@ -3,7 +3,7 @@ from credit.prepayment import PrepaymentModel
 from rates.models import InterestRateModel
 from credit.forecast import vintage_settings
 from credit.forecast import get_budget
-from credit.vintages import VintageForecast
+from credit.vintages import CreditVintage
 from common.presentation import tabulate_print
 
 
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     prod = 'tarjeta de credito'
     initial_date = '01-31-2017'
     budget = get_budget(product_name = prod, sdate = initial_date)
-    fore = len(budget)
+    fore = 1
 
     prep_array = PrepaymentModel.psa(nper = fore,
                                      ceil = 0.03,
@@ -32,7 +32,7 @@ if __name__ == '__main__':
                                     index_array =
                                     index_array)
 
-        my_vintage = VintageForecast(settings = settings)
+        my_vintage = CreditVintage(settings = settings)
 
         print(sdate, ' - OK')
 

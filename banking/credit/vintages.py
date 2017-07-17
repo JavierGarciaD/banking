@@ -5,8 +5,7 @@ from rates.conversion import ea_a_nmv
 from rates.conversion import compound_effective_yr
 
 
-class VintageForecast:
-
+class CreditVintage:
     #############################################################
     # Private methods
     #############################################################
@@ -321,6 +320,80 @@ class VintageForecast:
         return self.ans_df.index
 
 
-def vintages_sum(v1, v2):
+class VintageMock:
+    def __init__(self, name, sdate, nper):
+        self.name = name
+        self.sdate = sdate
+        self.nper = nper
+
+    def name(self):
+        return self.name
+
+    def get_index(self):
+        data = pd.date_range(start = self.sdate, freq = 'M',
+                             periods = self.periods)
+        return pd.DatetimeIndex(data)
+
+
+class CreditVintageCollection:
     # TODO: add two vintages
-    return NotImplementedError
+    def __init__(self, v1, v2):
+        self.v1 = v1
+        self.v2 = v2
+        self.ans_df = pd.DataFrame()
+        self._init_df()
+
+    def _index(self):
+
+        index1 = self.v1.get_index
+        index2 = self.v2.get_index
+        new_index = index1+ index2
+        print(index1)
+        print("################################")
+        print(index2)
+        print("################################")
+        print(new_index)
+
+    def name(self):
+        """
+
+        :return: list of names of the vintages in the collection.
+        """
+        if isinstance(self.v1.name, list) and isinstance(self.v2.name, list):
+            return self.v1.name + self.v2.name
+        if isinstance(self.v1.name, str) and isinstance(self.v2.name, str):
+            return [self.v1.name, self.v2.name]
+        if isinstance(self.v1.name, list) and isinstance(self.v2.name, str):
+            return self.v1.name.append(self.v2.name)
+        if isinstance(self.v2.name, list) and isinstance(self.v1.name, str):
+            return self.v2.name.append(self.v1.name)
+
+    def nper(self):
+        pass
+
+    def sdate(self):
+        pass
+
+    def rate_type(self):
+        pass
+
+    def get_balance(self):
+        pass
+
+    def get_serie(self):
+        pass
+
+    def get_index(self):
+        pass
+
+
+if __name__ == '__main__':
+    v1 = VintageMock(name = 'uno', sdate = '31/01/2017', nper = 12)
+    v2 = VintageMock(name = ['uno,', 'dos'])
+
+    print(v1.name)
+    print(v2.name)
+    print('===================', '\n')
+
+    v3 = CreditVintageCollection(v1, v2)
+    #print(v3.name())
