@@ -331,28 +331,16 @@ class VintageMock:
 
     def get_index(self):
         data = pd.date_range(start = self.sdate, freq = 'M',
-                             periods = self.periods)
+                             periods = self.nper)
         return pd.DatetimeIndex(data)
 
 
 class CreditVintageCollection:
     # TODO: add two vintages
-    def __init__(self, v1, v2):
+    def __init__(self, v1=None, v2=None):
         self.v1 = v1
         self.v2 = v2
-        self.ans_df = pd.DataFrame()
-        self._init_df()
-
-    def _index(self):
-
-        index1 = self.v1.get_index
-        index2 = self.v2.get_index
-        new_index = index1+ index2
-        print(index1)
-        print("################################")
-        print(index2)
-        print("################################")
-        print(new_index)
+        self._ans_df = pd.DataFrame()
 
     def name(self):
         """
@@ -378,7 +366,10 @@ class CreditVintageCollection:
         pass
 
     def get_balance(self):
-        pass
+        bal1 = self.v1.getbalance(per_score = False)
+        bal2 = self.v2.getbalance(per_score = False)
+        self._ans_df = bal1.add(bal2, fill_value = 0)
+        return bal3
 
     def get_serie(self):
         pass
@@ -389,11 +380,13 @@ class CreditVintageCollection:
 
 if __name__ == '__main__':
     v1 = VintageMock(name = 'uno', sdate = '31/01/2017', nper = 12)
-    v2 = VintageMock(name = ['uno,', 'dos'])
+    v2 = VintageMock(name = ['uno,', 'dos'], sdate='28-02-2017', nper = 12)
+    index1 = v1.get_index()
+    index2 = v2.get_index()
 
-    print(v1.name)
-    print(v2.name)
-    print('===================', '\n')
+    v3 = CreditVintageCollection()
+    #v3 = CreditVintageCollection(v1, v2)
+    print(v3, type(v3))
+    #index3 = v3._index()
+    #print(index3)
 
-    v3 = CreditVintageCollection(v1, v2)
-    #print(v3.name())
