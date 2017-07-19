@@ -337,10 +337,25 @@ class VintageMock:
 
 class CreditVintageCollection:
     # TODO: add two vintages
-    def __init__(self, v1=None, v2=None):
-        self.v1 = v1
-        self.v2 = v2
-        self._ans_df = pd.DataFrame()
+    def __init__(self):
+        self.balance = self.balance
+        self.info = self.info
+
+    def create(self):
+        self.balance = pd.DataFrame()
+        self.info = pd.DataFrame()
+
+    def balance(self):
+        pass
+
+    def info(self):
+        pass
+
+    def add(self, vintage, per_score):
+        initial_balance = self.balance
+        balance_to_add = self.vintage.get_balance(per_score = per_score)
+        collection_balance = initial_balance.add(balance_to_add)
+        return collection_balance
 
     def name(self):
         """
@@ -366,10 +381,9 @@ class CreditVintageCollection:
         pass
 
     def get_balance(self):
-        bal1 = self.v1.getbalance(per_score = False)
-        bal2 = self.v2.getbalance(per_score = False)
-        self._ans_df = bal1.add(bal2, fill_value = 0)
-        return bal3
+        pass
+
+
 
     def get_serie(self):
         pass

@@ -13,7 +13,7 @@ if __name__ == '__main__':
     prod = 'tarjeta de credito'
     initial_date = '01-31-2017'
     budget = get_budget(product_name = prod, sdate = initial_date)
-    fore = len(budget)
+    fore = len(budget)*12
 
     prep_array = PrepaymentModel.psa(nper = fore,
                                      ceil = 0.03,
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     index_array = InterestRateModel.zero(nper = fore,
                                          fecha_inicial = initial_date)
 
-    ans = pd.DataFrame()
+    collection = CreditVintageCollection(per_score = False)
     for sdate, m_disbur in budget.iteritems():
 
         settings = vintage_settings(product_name = prod,
@@ -30,15 +30,17 @@ if __name__ == '__main__':
                                     disburment = m_disbur,
                                     fore_length = fore,
                                     prepay_array = prep_array,
-                                    index_array =
-                                    index_array)
+                                    index_array = index_array)
 
         my_vintage = CreditVintage(settings = settings)
 
-        print(sdate, ' - OK')
-        ans = CreditVintageCollection
+        print("#########################################")
+        print("# THE ORIGINAL VINTAGE")
+        print("#########################################")
+        tabulate_print(my_vintage.get_balance(per_score = False))
+        print('\n', '\n')
 
-        ans = ans.add(my_vintage.get_balance(per_score = False),
-                      fill_value = 0.0)
-    tabulate_print(ans)
+        #collection = collection.add(my_vintage)
+
+    #tabulate_print(collection.get_balance())
 
