@@ -1,4 +1,3 @@
-import pandas as pd
 from credit.prepayment import PrepaymentModel
 from rates.models import InterestRateModel
 from credit.forecast import vintage_settings
@@ -22,7 +21,7 @@ if __name__ == '__main__':
     index_array = InterestRateModel.zero(nper = fore,
                                          fecha_inicial = initial_date)
 
-    collection = CreditVintageCollection()
+    collection = CreditVintageCollection(data = None)
     for sdate, m_disbur in budget.iteritems():
 
         settings = vintage_settings(product_name = prod,
@@ -32,6 +31,7 @@ if __name__ == '__main__':
                                     prepay_array = prep_array,
                                     index_array = index_array)
 
+        print(settings)
         my_vintage = CreditVintage(settings = settings)
 
         print("#########################################")
@@ -40,7 +40,9 @@ if __name__ == '__main__':
         tabulate_print(my_vintage.get_balance(per_score = False))
         print('\n', '\n')
 
-        #collection = collection.add(my_vintage)
+        collection = collection(data = my_vintage)
 
+        coll_balance = collection.get_balance(per_score = True)
+        print(coll_balance)
     #tabulate_print(collection.get_balance(per_score = False))
 

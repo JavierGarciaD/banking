@@ -319,6 +319,9 @@ class CreditVintage:
         """
         return self.ans_df.index
 
+    def get_scores(self):
+        return self._scores
+
 
 class VintageMock:
     def __init__(self, name, sdate, nper):
@@ -337,62 +340,19 @@ class VintageMock:
 
 class CreditVintageCollection:
     # TODO: add two vintages
-    def __init__(self):
-        self.balance = self.balance
-        self.info = self.info
-
-    def create(self):
-        self.balance = pd.DataFrame()
-        self.info = pd.DataFrame()
-
-    def balance(self):
-        pass
-
-    def info(self):
-        pass
-
-    def add(self, vintage, per_score):
-        initial_balance = self.balance
-        balance_to_add = self.vintage.get_balance(per_score = per_score)
-        collection_balance = initial_balance.add(balance_to_add)
-        return collection_balance
-
-    def name(self):
-        """
-
-        :return: list of names of the vintages in the collection.
-        """
-        if isinstance(self.v1.name, list) and isinstance(self.v2.name, list):
-            return self.v1.name + self.v2.name
-        if isinstance(self.v1.name, str) and isinstance(self.v2.name, str):
-            return [self.v1.name, self.v2.name]
-        if isinstance(self.v1.name, list) and isinstance(self.v2.name, str):
-            return self.v1.name.append(self.v2.name)
-        if isinstance(self.v2.name, list) and isinstance(self.v1.name, str):
-            return self.v2.name.append(self.v1.name)
-
-    def nper(self):
-        pass
-
-    def sdate(self):
-        pass
-
-    def rate_type(self):
-        pass
-
-    def get_balance(self, per_score):
-        if per_score is True:
-            return True
+    def __init__(self, data=None):
+        if data is None:
+            self.data = pd.DataFrame()
+            self.info = pd.DataFrame()
         else:
-            return False
+            balance2add = data.get_balance(per_score = True)
+            self.data = self.data.add(balance2add)
 
-
-
-    def get_serie(self):
-        pass
-
-    def get_index(self):
-        pass
+    def get_balance(self, per_score = False):
+        if per_score is True:
+            return self.data
+        else:
+            pass
 
 
 if __name__ == '__main__':
@@ -402,8 +362,7 @@ if __name__ == '__main__':
     index2 = v2.get_index()
 
     v3 = CreditVintageCollection()
-    #v3 = CreditVintageCollection(v1, v2)
-    print(v3, type(v3))
+    print(v3.get_balance(per_score = True), type(v3))
     #index3 = v3._index()
     #print(index3)
 

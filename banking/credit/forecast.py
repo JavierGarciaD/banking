@@ -82,7 +82,6 @@ def get_scores():
     ret = []
     for row in ans:
         ret.append(int(row[0]))
-
     return ret
 
 
