@@ -294,7 +294,7 @@ class CreditVintage:
         """
 
         """
-        if per_score:
+        if per_score is True:
             return self.ans_df
         else:
             ans = pd.DataFrame(columns = self._cols, index = self.ans_df.index)
@@ -380,8 +380,11 @@ class CreditVintageCollection:
     def rate_type(self):
         pass
 
-    def get_balance(self):
-        pass
+    def get_balance(self, per_score):
+        if per_score is True:
+            return True
+        else:
+            return False
 
 
 

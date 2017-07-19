@@ -22,7 +22,7 @@ if __name__ == '__main__':
     index_array = InterestRateModel.zero(nper = fore,
                                          fecha_inicial = initial_date)
 
-    collection = CreditVintageCollection(per_score = False)
+    collection = CreditVintageCollection()
     for sdate, m_disbur in budget.iteritems():
 
         settings = vintage_settings(product_name = prod,
@@ -42,5 +42,5 @@ if __name__ == '__main__':
 
         #collection = collection.add(my_vintage)
 
-    #tabulate_print(collection.get_balance())
+    #tabulate_print(collection.get_balance(per_score = False))
 
