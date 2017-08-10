@@ -331,35 +331,35 @@ class CreditVintage:
     def get_scores(self):
         return self._scores
 
-    def get_quality(self, result, type = "%"):
+    def get_quality(self):
         """
 
         :param result: 'nonperforming' or 'nonproductive'
-        :param type: absolute value (abs) or relative (%)
+        :param result_type: absolute value (abs) or relative (%)
         :return:
         """
-
+        ans_df = pd.DataFrame(index = self.get_index())
         end_bal_per_score = self.get_serie(serie_name = 'end_bal',
                                            per_score = True)
+
+        cols = list(end_bal_per_score)
+        cols.remove('end_bal_0')
+        ans_df['nonperforming'] = end_bal_per_score[cols].sum(axis = 1)
+
+        if self._credit_type == "consumer":
+            cols.remove('end_bal_30')
+        elif self._credit_type == "commercial":
+            cols.remove('end_bal_30')
+            cols.remove('end_bal_60')
+        ans_df['nonproductive'] = end_bal_per_score[cols].sum(axis = 1)
+
         total_balance = self.get_serie(serie_name = 'end_bal',
                                        per_score = False)
-        col_list = list(end_bal_per_score)
 
-        if result == 'nonperforming':
-            col_list.remove('end_bal_0')
+        ans_df['nperf_indicator']= ans_df['nonperforming'] / total_balance
+        ans_df['nprod_indicator'] = ans_df['nonproductive'] / total_balance
 
-        elif result == 'nonproductive':
-            if self._credit_type == 'consumer':
-                col_list.remove('end_bal_0', 'end_bal_30')
-            elif self._credit_type == 'commercial':
-                col_list.remove('end_bal_0', 'end_bal_30', 'end_bal_60')
-
-        ans = end_bal_per_score[col_list].sum(axis = 1)
-
-        if type == 'abs':
-            return ans
-        elif type == '%':
-            return ans / total_balance
+        return ans_df
 
 
 class VintageMock:

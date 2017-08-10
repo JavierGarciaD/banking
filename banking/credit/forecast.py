@@ -1,10 +1,61 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 from rates.models import InterestRateModel
+from credit.prepayment import PrepaymentModel
 from common.db_manager import DB
 from sqlalchemy import select
 from sqlalchemy import and_
 from sqlalchemy import asc
+
+
+def vintage_sett_manual(name, forecast, nper, sdate, repricing, rate_type,
+                        rate_level, notional, scores, pay, prepay, w_off,
+                        rolling, credit_type):
+    """
+    Manual constructor of settings dictionary for a Credit Vintage.
+    All data must be provided, no conection to external databases.
+    :param name:
+    :param forecast:
+    :param nper:
+    :param sdate:
+    :param repricing:
+    :param rate_type:
+    :param rate_level:
+    :param notional:
+    :param scores:
+    :param pay:
+    :param prepay:
+    :param w_off:
+    :param rolling:
+    :param credit_type:
+    :return: dictionary
+    """
+    ans_dict = dict()
+
+    ans_dict['name'] = name
+    ans_dict['forecast'] = forecast
+    ans_dict['nper'] = nper
+    ans_dict['sdate'] = sdate
+    ans_dict['repricing'] = repricing
+    ans_dict['rate_type'] = rate_type
+    ans_dict['notional'] = notional
+    ans_dict['index_rates_array'] = InterestRateModel.zero(nper = forecast,
+                                                           sdate = sdate)
+    ans_dict['rate_spreads_array'] = InterestRateModel.fixed(nper = forecast,
+                                                             sdate = sdate,
+                                                             level =
+                                                             rate_level)
+    ans_dict['prepay_array'] = PrepaymentModel.psa(nper = forecast,
+                                                   ceil = 0.03,
+                                                   stable_period = 12)
+    ans_dict['prepay_per_score'] = pd.Series(data = prepay, index = scores)
+    ans_dict['rolling_m'] = rolling
+    ans_dict['scores'] = scores
+    ans_dict['pay_per_score'] = pd.Series(data = pay, index = scores)
+    ans_dict['writeoff_per_score'] = pd.Series(data = w_off, index = scores)
+    ans_dict['credit_type'] = credit_type
+
+    return ans_dict
 
 
 def get_contract_info(product_name):
@@ -19,6 +70,7 @@ def get_contract_info(product_name):
     ########################################
     table = db.table('contract_info')
     sql = select([table.c.nper,
+                  table.c.credit_type,
                   table.c.rate_type,
                   table.c.repricing,
                   table.c.rate_spread]).where(
@@ -28,9 +80,10 @@ def get_contract_info(product_name):
     ans = db.query(sql).fetchone()
 
     ans_dict = dict(nper = int(ans[0]),
-                    rate_type = str(ans[1]),
-                    repricing = int(ans[2]),
-                    rate_spread = float(ans[3]))
+                    credit_type = str(ans[1]),
+                    rate_type = str(ans[2]),
+                    repricing = int(ans[3]),
+                    rate_spread = float(ans[4]))
 
     return ans_dict
 
@@ -141,9 +194,8 @@ def get_budget(product_name, sdate):
     return pd.Series(data = ret, index = date_index)
 
 
-def vintage_settings(product_name, sdate,
-                     disburment, fore_length,
-                     prepay_array, index_array):
+def vintage_sett_db(product_name, sdate, disburment, fore_length,
+                    prepay_array, index_array):
 
     # Gets information from forecast database about the contract_info:
     contract_info = get_contract_info(product_name)
@@ -158,6 +210,7 @@ def vintage_settings(product_name, sdate,
 
     settings = dict(name = product_name,
                     nper = contract_info['nper'],
+                    credit_type = contract_info['credit_type'],
                     rate_type = contract_info['rate_type'],
                     repricing = contract_info['repricing'],
                     forecast = int(fore_length),
@@ -174,17 +227,6 @@ def vintage_settings(product_name, sdate,
                     )
 
     return settings
-
-
-# def provision_por_calificacion():
-#      return {0: 0.10,
-#             30: 0.15,
-#             60: 0.25,
-#             90: 0.40,
-#             120: 0.60,
-#             150: 0.80,
-#             180: 1.00
-#     }
 
 
 if __name__ == '__main__':

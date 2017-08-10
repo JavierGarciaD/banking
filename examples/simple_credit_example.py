@@ -1,6 +1,6 @@
 from credit.prepayment import PrepaymentModel
 from rates.models import InterestRateModel
-from credit.forecast import vintage_settings
+from credit.forecast import vintage_sett_db
 from credit.forecast import get_budget
 from credit.vintages import CreditVintage
 from credit.vintages import CreditVintageCollection
@@ -24,12 +24,12 @@ if __name__ == '__main__':
     collection = CreditVintageCollection(data = None)
     for sdate, m_disbur in budget.iteritems():
 
-        settings = vintage_settings(product_name = prod,
-                                    sdate = sdate,
-                                    disburment = m_disbur,
-                                    fore_length = fore,
-                                    prepay_array = prep_array,
-                                    index_array = index_array)
+        settings = vintage_sett_db(product_name = prod,
+                                   sdate = sdate,
+                                   disburment = m_disbur,
+                                   fore_length = fore,
+                                   prepay_array = prep_array,
+                                   index_array = index_array)
 
         my_vintage = CreditVintage(settings = settings)
 
