@@ -15,8 +15,8 @@ class InterestRateModel:
         return pd.Series([level] * nper, index = dates_index)
 
     @staticmethod
-    def zero(nper, fecha_inicial):
-        dates_index = pd.date_range(fecha_inicial, periods = nper, freq = 'M')
+    def zero(nper, sdate):
+        dates_index = pd.date_range(sdate, periods = nper, freq = 'M')
         return pd.Series([0.0] * nper, index = dates_index)
 
     @staticmethod

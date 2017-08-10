@@ -25,6 +25,7 @@ class CreditVintage:
         self._sdate = pd.to_datetime(settings['sdate'])
         self._notional = np.round(settings['notional'], self._dec2)
 
+        self._credit_type = settings['credit_type']
         self._repricing = settings['repricing']
         self._rate_type = settings['rate_type']
         self._index_vals = np.round(settings['index_rates_array'], self._dec6)
@@ -216,7 +217,7 @@ class CreditVintage:
         :return Pandas Series of nominal periodic rates adjusted by repricing
         frequency
         """
-        if self._rate_type == "FIJA":
+        if self._rate_type == "FIX":
             return np.round(ea_a_nmv(vector_a = self._spreads), self._dec6)
 
         elif self._rate_type == "DTF" or self._rate_type == "IPC":
@@ -293,6 +294,8 @@ class CreditVintage:
     def get_balance(self, per_score = False):
         """
 
+        :param per_score:
+        :return:
         """
         if per_score is True:
             return self.ans_df
@@ -303,6 +306,12 @@ class CreditVintage:
             return ans
 
     def get_serie(self, serie_name, per_score = False):
+        """
+
+        :param serie_name:
+        :param per_score:
+        :return:
+        """
         serie_name = serie_name.lower()
         cols_names = [serie_name + '_' + str(each_score) for each_score in
                       self._scores]
@@ -322,6 +331,36 @@ class CreditVintage:
     def get_scores(self):
         return self._scores
 
+    def get_quality(self, result, type = "%"):
+        """
+
+        :param result: 'nonperforming' or 'nonproductive'
+        :param type: absolute value (abs) or relative (%)
+        :return:
+        """
+
+        end_bal_per_score = self.get_serie(serie_name = 'end_bal',
+                                           per_score = True)
+        total_balance = self.get_serie(serie_name = 'end_bal',
+                                       per_score = False)
+        col_list = list(end_bal_per_score)
+
+        if result == 'nonperforming':
+            col_list.remove('end_bal_0')
+
+        elif result == 'nonproductive':
+            if self._credit_type == 'consumer':
+                col_list.remove('end_bal_0', 'end_bal_30')
+            elif self._credit_type == 'commercial':
+                col_list.remove('end_bal_0', 'end_bal_30', 'end_bal_60')
+
+        ans = end_bal_per_score[col_list].sum(axis = 1)
+
+        if type == 'abs':
+            return ans
+        elif type == '%':
+            return ans / total_balance
+
 
 class VintageMock:
     def __init__(self, name, sdate, nper):
@@ -340,7 +379,7 @@ class VintageMock:
 
 class CreditVintageCollection:
     # TODO: add two vintages
-    def __init__(self, data=None):
+    def __init__(self, data = None):
         if data is None:
             self.data = pd.DataFrame()
             self.info = pd.DataFrame()
@@ -357,12 +396,11 @@ class CreditVintageCollection:
 
 if __name__ == '__main__':
     v1 = VintageMock(name = 'uno', sdate = '31/01/2017', nper = 12)
-    v2 = VintageMock(name = ['uno,', 'dos'], sdate='28-02-2017', nper = 12)
+    v2 = VintageMock(name = ['uno,', 'dos'], sdate = '28-02-2017', nper = 12)
     index1 = v1.get_index()
     index2 = v2.get_index()
 
     v3 = CreditVintageCollection()
     print(v3.get_balance(per_score = True), type(v3))
-    #index3 = v3._index()
-    #print(index3)
-
+    # index3 = v3._index()
+    # print(index3)

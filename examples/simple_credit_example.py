@@ -12,14 +12,14 @@ if __name__ == '__main__':
     prod = 'tarjeta de credito'
     initial_date = '01-31-2017'
     budget = get_budget(product_name = prod, sdate = initial_date)
-    fore = len(budget)*12
+    fore = len(budget) * 12
 
     prep_array = PrepaymentModel.psa(nper = fore,
                                      ceil = 0.03,
                                      stable_period = 12)
 
     index_array = InterestRateModel.zero(nper = fore,
-                                         fecha_inicial = initial_date)
+                                         sdate = initial_date)
 
     collection = CreditVintageCollection(data = None)
     for sdate, m_disbur in budget.iteritems():
@@ -31,7 +31,6 @@ if __name__ == '__main__':
                                     prepay_array = prep_array,
                                     index_array = index_array)
 
-        print(settings)
         my_vintage = CreditVintage(settings = settings)
 
         print("#########################################")
