@@ -6,15 +6,12 @@ from credit.forecast import vintage_sett_manual
 from common.presentation import tabulate_print
 
 
-#################################################################
-# EXAMPLE: One Vintage
-# A simple example of the construction of a vintage using data
-# directly
-#
-#################################################################
+def one_vintage_example():
+    """
+    A simple example of the construction of a vintage using user
+    input data
 
-
-if __name__ == '__main__':
+    """
     roll = [[0.97, 0.03, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
             [0.40, 0.05, 0.55, 0.00, 0.00, 0.00, 0.00, 0.00],
             [0.16, 0.02, 0.02, 0.80, 0.00, 0.00, 0.00, 0.00],
@@ -34,9 +31,12 @@ if __name__ == '__main__':
                                rate_level = 0.2,
                                notional = 10000.0,
                                scores = [0, 30, 60, 90, 120, 150, 180, 210],
-                               pay = [0.99, 0.75, 0.55, 0.23, 0.15, 0.05, 0.01, 0.0],
-                               prepay = [1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                               w_off = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5],
+                               pay = [0.99, 0.75, 0.55, 0.23, 0.15, 0.05, 0.01,
+                                      0.0],
+                               prepay = [1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                         0.0],
+                               w_off = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5,
+                                        0.5],
                                rolling = {1: roll}
                                )
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     print('\n')
     print("##################################################")
-    print("             Calidad de Cartera",)
+    print("             Calidad de Cartera", )
     print("##################################################", '\n')
 
     quality = vintage.get_quality()
@@ -61,5 +61,9 @@ if __name__ == '__main__':
     if charting:
         matplotlib.style.use('ggplot')
         quality[['nonperforming', 'nonproductive']].plot(
-            title = 'CALIDAD DE CARTERA', linewidth = 5.0)
+                title = 'CALIDAD DE CARTERA', linewidth = 5.0)
         plt.show()
+
+
+if __name__ == '__main__':
+    one_vintage_example()
