@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../AlgoRepo/.idea/AlgoRepo.iml" filepath="$PROJECT_DIR$/../AlgoRepo/.idea/AlgoRepo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../athena/.idea/athena.iml" filepath="$PROJECT_DIR$/../athena/.idea/athena.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/banking.iml" filepath="$PROJECT_DIR$/.idea/banking.iml" />
     </modules>
   </component>
